@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 620" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif">
+  <defs>
+    <marker id="la" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#555"/>
+    </marker>
+  </defs>
+
+  <!-- Step 1 -->
+  <rect x="320" y="22" width="300" height="78" rx="9" fill="#fafafa" stroke="#c2c6ca" stroke-width="1.2"/>
+  <text x="470" y="55" text-anchor="middle" font-size="15" font-weight="600">The app joins the ecosystem</text>
+  <text x="470" y="76" text-anchor="middle" font-size="11.5" fill="#555">CMS Library statement + network registration</text>
+
+  <line x1="470" y1="100" x2="470" y2="122" stroke="#555" stroke-width="1.2" marker-end="url(#la)"/>
+
+  <!-- Step 2 -->
+  <rect x="320" y="126" width="300" height="78" rx="9" fill="#fafafa" stroke="#c2c6ca" stroke-width="1.2"/>
+  <text x="470" y="159" text-anchor="middle" font-size="15" font-weight="600">The patient verifies her identity</text>
+  <text x="470" y="180" text-anchor="middle" font-size="11.5" fill="#555">the app sends her to the CSP</text>
+
+  <!-- fork -->
+  <line x1="470" y1="204" x2="470" y2="218" stroke="#555" stroke-width="1.2"/>
+  <line x1="470" y1="218" x2="320" y2="248" stroke="#555" stroke-width="1.2" marker-end="url(#la)"/>
+  <line x1="470" y1="218" x2="620" y2="248" stroke="#555" stroke-width="1.2" marker-end="url(#la)"/>
+  <circle cx="470" cy="218" r="2.6" fill="#555"/>
+  <text x="504" y="214" font-size="10.5" fill="#777">id_token</text>
+
+  <!-- lanes -->
+  <rect x="180" y="250" width="280" height="250" rx="20" fill="#f3f8fc" stroke="#0072b2" stroke-width="1.4"/>
+  <rect x="480" y="250" width="280" height="250" rx="20" fill="#fdf9f0" stroke="#b97800" stroke-width="1.4"/>
+
+  <!-- caps -->
+  <rect x="192" y="258" width="256" height="26" rx="13" fill="#0072b2"/>
+  <text x="320" y="275.5" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">permission tickets</text>
+  <rect x="492" y="258" width="256" height="26" rx="13" fill="#b97800"/>
+  <text x="620" y="275.5" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">client assertions</text>
+
+  <!-- row separators -->
+  <g opacity="0.25">
+    <line x1="196" y1="360" x2="444" y2="360" stroke="#0072b2"/>
+    <line x1="196" y1="430" x2="444" y2="430" stroke="#0072b2"/>
+    <line x1="496" y1="360" x2="744" y2="360" stroke="#b97800"/>
+    <line x1="496" y1="430" x2="744" y2="430" stroke="#b97800"/>
+  </g>
+
+  <!-- Maria-decides dotted box across rows 1-2 -->
+  <rect x="10" y="298" width="760" height="128" rx="11" fill="none" stroke="#9db8aa" stroke-width="1.2" stroke-dasharray="7 5"/>
+  <text x="92" y="258" text-anchor="middle" font-size="13" font-weight="600" fill="#0f5132">The patient</text>
+  <text x="92" y="274" text-anchor="middle" font-size="13" font-weight="600" fill="#0f5132">agrees to share</text>
+  <text x="92" y="290" text-anchor="middle" font-size="13" font-weight="600" fill="#0f5132">and selects data sources</text>
+
+  <!-- row stubs -->
+  <g>
+    <text x="95" y="331" text-anchor="middle" font-size="11" fill="#555">Who records the grant?</text>
+    <text x="95" y="392" text-anchor="middle" font-size="11" fill="#555">Who sees where</text>
+    <text x="95" y="406" text-anchor="middle" font-size="11" fill="#555">the records are?</text>
+    <text x="95" y="447" text-anchor="middle" font-size="13" font-weight="600">Each data holder</text>
+    <text x="95" y="463" text-anchor="middle" font-size="13" font-weight="600">issues its own token</text>
+    <text x="95" y="478" text-anchor="middle" font-size="10" fill="#555">after verifying the app,</text>
+    <text x="95" y="490" text-anchor="middle" font-size="10" fill="#555">the patient, and the grant</text>
+  </g>
+
+  <!-- cells -->
+  <g text-anchor="middle" font-size="12">
+    <text x="320" y="327" fill="#0b4a75">a shared service,</text>
+    <text x="320" y="342" fill="#0b4a75">on its own screen</text>
+    <text x="620" y="327" fill="#7a5200">the app,</text>
+    <text x="620" y="342" fill="#7a5200">self-asserted</text>
+
+    <text x="320" y="400" fill="#0b4a75">only the service</text>
+    <text x="620" y="400" fill="#7a5200">the app</text>
+
+    <text x="320" y="462" fill="#0b4a75">the app presents</text>
+    <text x="320" y="477" fill="#0b4a75">a per-site ticket</text>
+    <text x="620" y="462" fill="#7a5200">the app presents</text>
+    <text x="620" y="477" fill="#7a5200">a cms_smart assertion</text>
+  </g>
+
+  <!-- converge -->
+  <line x1="320" y1="500" x2="470" y2="545" stroke="#555" stroke-width="1.2"/>
+  <line x1="620" y1="500" x2="470" y2="545" stroke="#555" stroke-width="1.2"/>
+  <line x1="470" y1="545" x2="470" y2="576" stroke="#555" stroke-width="1.2" marker-end="url(#la)"/>
+  <circle cx="470" cy="545" r="2.6" fill="#555"/>
+  <text x="470" y="600" text-anchor="middle" font-size="12.5" fill="#444">FHIR data flows</text>
+</svg>

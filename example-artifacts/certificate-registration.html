@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Registration with a community-issued certificate</title>
+<style>
+  :root { --fg:#1a1a1a; --bg:#fff; --bg-code:#f4f4f5; --accent:#0f5132; --accent-soft:#e7f1ec; --rule:#e5e5e5; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; padding:0; background:var(--bg); color:var(--fg);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    font-size:16px; line-height:1.6; }
+  main { max-width:860px; margin:0 auto; padding:32px 24px 96px; }
+  a { color:var(--accent); text-decoration:none; border-bottom:1px solid var(--accent-soft); }
+  code,pre { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:0.88em; }
+  code { background:var(--bg-code); padding:0.1em 0.35em; border-radius:3px; }
+  pre { background:var(--bg-code); padding:12px 14px; border-radius:6px; overflow-x:auto; white-space:pre-wrap; word-break:break-all; }
+  pre code { background:none; padding:0; }
+  h1 { font-size:1.6em; line-height:1.25; }
+  h2 { font-size:1.25em; margin-top:1.8em; border-bottom:1px solid var(--rule); padding-bottom:0.3em; }
+  hr { border:none; border-top:1px solid var(--rule); margin:2em 0; }
+  .site-nav { font-size:0.95em; background:var(--accent-soft); border:1px solid var(--rule); border-radius:6px; padding:10px 16px; margin-bottom:28px; }
+  .site-nav a { font-weight:600; }
+</style>
+</head>
+<body>
+<main>
+  <nav class="site-nav" aria-label="Site navigation">
+    <a href="../index.html">CAN Spec</a> ·
+    <a href="../apps-without-home-networks.html">Apps Without Home Networks</a> ·
+    <a href="../authorizing-access.html">Record Location &amp; Data Access</a> ·
+    <a href="index.html">Artifacts</a>
+  </nav>
+  <div id="content"><p>Loading…</p></div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous"></script>
+<script>
+const renderer = {
+  link(href, title, text) {
+    if (!/^https?:/.test(href)) href = href.replace(/\.md(#|$)/, '.html$1');
+    return '<a href="' + href + '">' + text + '</a>';
+  }
+};
+marked.use({ renderer, mangle: false, headerIds: true });
+fetch('certificate-registration.md').then(r => r.text()).then(md => {
+  document.getElementById('content').innerHTML = marked.parse(md);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CMS-Aligned Network Specification — Editor's Draft</title>
+<style>
+  :root {
+    --fg: #1a1a1a;
+    --fg-muted: #555;
+    --fg-faint: #888;
+    --bg: #ffffff;
+    --bg-soft: #fafafa;
+    --bg-code: #f4f4f5;
+    --accent: #0f5132;
+    --accent-soft: #e7f1ec;
+    --rule: #e5e5e5;
+    --rule-strong: #d4d4d4;
+    --must: #b91c1c;
+    --must-bg: #fef2f2;
+    --should: #b45309;
+    --should-bg: #fffbeb;
+    --may: #1d4ed8;
+    --may-bg: #eff6ff;
+    --note-bg: #f5f5f4;
+    --max-w: 760px;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-soft); }
+  a:hover { border-bottom-color: var(--accent); }
+  code, pre, .kw {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 0.92em;
+  }
+  code {
+    background: var(--bg-code);
+    padding: 0.1em 0.35em;
+    border-radius: 3px;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    max-width: 1180px;
+    margin: 0 auto;
+    gap: 48px;
+    padding: 0 32px;
+  }
+  aside {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 32px 0 32px 0;
+    border-right: 1px solid var(--rule);
+    font-size: 14px;
+  }
+  aside h2 {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-faint);
+    margin: 0 0 12px 0;
+    font-weight: 600;
+  }
+  aside ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  aside ol li { margin: 0; padding: 0; }
+  aside ol li a {
+    display: block;
+    padding: 5px 12px 5px 0;
+    color: var(--fg-muted);
+    border-bottom: none;
+    border-left: 2px solid transparent;
+    padding-left: 12px;
+  }
+  aside ol li a:hover { color: var(--fg); border-left-color: var(--rule-strong); }
+  aside ol li a.active { color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+  aside ol ol { margin-top: 2px; }
+  aside ol ol a { font-size: 13px; padding-left: 24px; }
+  main {
+    padding: 56px 0 120px 0;
+    max-width: var(--max-w);
+  }
+  .titleblock {
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 28px;
+    margin-bottom: 32px;
+  }
+  .eyebrow {
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin: 0 0 8px 0;
+  }
+  h1 {
+    font-size: 38px;
+    line-height: 1.15;
+    margin: 0 0 16px 0;
+    letter-spacing: -0.015em;
+    font-weight: 700;
+  }
+  .metabox {
+    background: var(--bg-soft);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin-top: 20px;
+    font-size: 14px;
+    color: var(--fg-muted);
+  }
+  .metabox dl { display: grid; grid-template-columns: 140px 1fr; gap: 4px 12px; margin: 0; }
+  .metabox dt { color: var(--fg-faint); }
+  .metabox dd { margin: 0; color: var(--fg); }
+  h2 {
+    font-size: 26px;
+    line-height: 1.25;
+    margin: 56px 0 16px 0;
+    letter-spacing: -0.01em;
+    font-weight: 650;
+    padding-top: 8px;
+  }
+  h3 {
+    font-size: 19px;
+    margin: 32px 0 10px 0;
+    font-weight: 600;
+  }
+  h4 {
+    font-size: 16px;
+    margin: 24px 0 6px 0;
+    font-weight: 600;
+    color: var(--fg-muted);
+  }
+  p { margin: 0 0 16px 0; }
+  ul, ol { margin: 0 0 16px 0; padding-left: 24px; }
+  li { margin-bottom: 6px; }
+  blockquote {
+    margin: 16px 0;
+    padding: 12px 20px;
+    background: var(--note-bg);
+    border-left: 3px solid var(--rule-strong);
+    color: var(--fg-muted);
+    border-radius: 0 4px 4px 0;
+  }
+  blockquote p { margin-bottom: 0; }
+  .kw {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-weight: 600;
+    font-size: 0.82em;
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+    vertical-align: baseline;
+  }
+  .kw.must { color: var(--must); background: var(--must-bg); }
+  .kw.must-not { color: var(--must); background: var(--must-bg); }
+  .kw.should { color: var(--should); background: var(--should-bg); }
+  .kw.should-not { color: var(--should); background: var(--should-bg); }
+  .kw.may { color: var(--may); background: var(--may-bg); }
+  .kw.shall { color: var(--must); background: var(--must-bg); }
+  .kw.required { color: var(--must); background: var(--must-bg); }
+  .kw.recommended { color: var(--should); background: var(--should-bg); }
+  .kw.optional { color: var(--may); background: var(--may-bg); }
+  hr {
+    border: none;
+    border-top: 1px solid var(--rule);
+    margin: 48px 0;
+  }
+  .callout {
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent);
+    background: var(--bg-soft);
+    padding: 14px 18px;
+    border-radius: 0 4px 4px 0;
+    margin: 16px 0;
+    font-size: 15px;
+  }
+  .callout .label {
+    display: block;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .callout.warn { border-left-color: var(--should); }
+  .callout.warn .label { color: var(--should); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  th {
+    font-weight: 600;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--rule-strong);
+  }
+  td:first-child, th:first-child { padding-left: 0; }
+  td:last-child, th:last-child { padding-right: 0; }
+  .section-anchor {
+    color: var(--fg-faint);
+    font-weight: 400;
+    font-size: 0.9em;
+    margin-right: 8px;
+  }
+  .footer {
+    margin-top: 80px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+    font-size: 13px;
+    color: var(--fg-faint);
+  }
+  .anchor-link {
+    visibility: hidden;
+    margin-left: 8px;
+    color: var(--fg-faint);
+    font-weight: 400;
+    border-bottom: none;
+    font-size: 0.7em;
+  }
+  h2:hover .anchor-link, h3:hover .anchor-link { visibility: visible; }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; gap: 0; padding: 0 20px; }
+    aside {
+      position: static;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--rule);
+      padding: 20px 0;
+    }
+    main { padding: 24px 0 60px 0; }
+    h1 { font-size: 30px; }
+  }
+</style>
+</head>
+<body>
+<div style="max-width:1180px;margin:0 auto;padding:16px 32px 0;">
+  <nav aria-label="Site navigation" style="font-size:.95em;background:#e7f1ec;border:1px solid #e5e5e5;border-radius:6px;padding:10px 16px;">
+    <a href="index.html">CAN Spec</a> &#183;
+    <a href="apps-without-home-networks.html">Apps Without Home Networks</a> &#183;
+    <a href="authorizing-access.html">Record Location &amp; Data Access</a> &#183;
+    <a href="example-artifacts/index.html">Artifacts</a>
+  </nav>
+</div>
+<div class="layout">
+  <aside>
+    <h2>On this page</h2>
+    <ol>
+      <li><a href="#scope">Scope</a></li>
+      <li><a href="#abstract">Abstract</a></li>
+      <li><a href="#status">Status of This Document</a></li>
+      <li><a href="#conformance"><span class="section-anchor">1</span>Conformance</a></li>
+      <li><a href="#terminology"><span class="section-anchor">2</span>Terminology</a></li>
+      <li><a href="#architecture"><span class="section-anchor">3</span>Architecture Overview</a></li>
+      <li><a href="#obligations"><span class="section-anchor">4</span>The Three Core Obligations</a>
+        <ol>
+          <li><a href="#obl-1">4.1 Respond for data holders</a></li>
+          <li><a href="#obl-2">4.2 Vouch for good standing</a></li>
+          <li><a href="#obl-3">4.3 Respond cross-network</a></li>
+        </ol>
+      </li>
+      <li><a href="#pathways"><span class="section-anchor">5</span>Connectivity Pathways</a>
+        <ol>
+          <li><a href="#path-1">5.1 Intranetwork</a></li>
+          <li><a href="#path-2">5.2 RLS Network Search ($match)</a></li>
+          <li><a href="#path-3">5.3 Targeted via NPD</a></li>
+          <li><a href="#path-4">5.4 Bilateral Peering (OPTIONAL)</a></li>
+        </ol>
+      </li>
+      <li><a href="#matching"><span class="section-anchor">6</span>Patient Matching</a></li>
+      <li><a href="#auto-reg"><span class="section-anchor">7</span>Auto-Registration &amp; Presumptive Eligibility</a></li>
+      <li><a href="#authentication"><span class="section-anchor">8</span>Authentication</a></li>
+      <li><a href="#authorization"><span class="section-anchor">9</span>Authorization</a></li>
+      <li><a href="#query"><span class="section-anchor">10</span>Query / Data Exchange</a></li>
+      <li><a href="#npd"><span class="section-anchor">11</span>NPD Publication</a></li>
+      <li><a href="#audit"><span class="section-anchor">12</span>Audit Logging</a></li>
+      <li><a href="#security"><span class="section-anchor">13</span>Security</a></li>
+      <li><a href="#fees"><span class="section-anchor">14</span>Fees &amp; Economics</a></li>
+      <li><a href="#accountability"><span class="section-anchor">15</span>Accountability</a></li>
+      <li><a href="#july"><span class="section-anchor">16</span>July 4, 2026 Framework Requirements</a></li>
+      <li><a href="#rules-attestation"><span class="section-anchor">17</span>Rules of the Road Attestation</a></li>
+      <li><a href="#open-questions">Appendix A — Open Questions</a></li>
+      <li><a href="#sources">Appendix B — Source Documents</a></li>
+      <li><a href="#references">Appendix C — Normative References</a></li>
+    </ol>
+  </aside>
+
+  <main>
+    <div class="titleblock">
+      <p class="eyebrow">Editor's Draft · Community Specification</p>
+      <h1>CMS-Aligned Network Specification</h1>
+      <p style="font-size: 17px; color: var(--fg-muted); margin: 0;">
+        Technical and operational requirements for Health Information Networks seeking
+        recognition under the CMS Health Technology Ecosystem.
+      </p>
+      <div class="metabox">
+        <dl>
+          <dt>This version</dt><dd><code>can-spec/0.4-draft</code></dd>
+          <dt>Latest published</dt><dd><em>none yet</em></dd>
+          <dt>Date</dt><dd>June 22, 2026</dd>
+          <dt>Editor</dt><dd>Liz Lewis · b.well Connected Health</dd>
+          <dt>Feedback</dt><dd>CMS HTE working groups</dd>
+        </dl>
+      </div>
+    </div>
+
+    <section id="scope">
+      <h2>Scope</h2>
+      <p>The immediate focus of this specification is the use cases currently defined in the CMS Interoperability Framework: patient access, payer access (for specific permitted activities), and provider access. Patient access is the top priority, followed by payer access and provider access. The specification has also been written with future use cases in mind, including proxy and caregiver access, and notification flows such as patient encounter notifications; where requirements for those use cases are not yet specified, this document identifies the gaps rather than foreclosing them.</p>
+    </section>
+
+    <section id="abstract">
+      <h2>Abstract</h2>
+      <p>This document specifies the technical and operational requirements a Health Information
+      Network <span class="kw must">MUST</span> meet to be recognized as a
+      <strong>CMS-Aligned Network (Network)</strong> under the CMS Health Technology Ecosystem (HTE).</p>
+      <p>The specification covers the three core obligations of a CMS-Aligned Network, the three
+      required connectivity pathways plus one optional pathway, patient matching, auto-registration,
+      authentication, authorization, query handling, National Provider Directory (NPD) publication,
+      audit logging, security validation, fees, and accountability.</p>
+      <p>This specification deliberately covers <strong>network obligations only</strong>. Trust
+      pathways for apps, EHRs, providers, and payers are referenced where they intersect network
+      behavior but are specified elsewhere.</p>
+    </section>
+
+    <section id="status">
+      <h2>Status of This Document</h2>
+      <p>This is an editor's draft assembled from working-group materials. It has no normative
+      force on its own. The authoritative source for CMS-Aligned status is the
+      <strong>CMS Interoperability Framework</strong> published by CMS at
+      <a href="https://www.cms.gov/health-technology-ecosystem/interoperability-framework">cms.gov/health-technology-ecosystem/interoperability-framework</a>.
+      Where this document and the Framework conflict, the Framework controls.</p>
+      <p>This draft is offered as a consolidated rendering of network-side requirements so that
+      implementers can evaluate conformance against a single artifact. Working-group input is
+      welcome on operational specifics (auto-registration profiles, audit standards, dispute
+      resolution, presumptive-eligibility scope).</p>
+    </section>
+
+    <section id="conformance">
+      <h2><span class="section-anchor">1</span>Conformance</h2>
+      <p>The keywords
+      <span class="kw must">MUST</span>,
+      <span class="kw must-not">MUST NOT</span>,
+      <span class="kw required">REQUIRED</span>,
+      <span class="kw shall">SHALL</span>,
+      <span class="kw shall">SHALL NOT</span>,
+      <span class="kw should">SHOULD</span>,
+      <span class="kw should-not">SHOULD NOT</span>,
+      <span class="kw recommended">RECOMMENDED</span>,
+      <span class="kw may">MAY</span>, and
+      <span class="kw optional">OPTIONAL</span>
+      in this document are to be interpreted as described in
+      BCP&nbsp;14 (<a href="https://www.rfc-editor.org/rfc/rfc2119">RFC&nbsp;2119</a>, <a href="https://www.rfc-editor.org/rfc/rfc8174">RFC&nbsp;8174</a>) when, and only when, they
+      appear in all capitals.</p>
+      <p>A network conforms to this specification when it satisfies every
+      <span class="kw must">MUST</span> in §§ 3–14 and is in good standing under § 15.</p>
+    </section>
+
+    <section id="terminology">
+      <h2><span class="section-anchor">2</span>Terminology</h2>
+      <p><strong>Network (CMS-Aligned Network).</strong> A governed exchange layer, combining technology, trust agreements, and shared operating rules, that enables multiple organizations to send and receive standardized health data without building custom point-to-point connections to every counterparty. Within the Health Tech Ecosystem, networks serve as the routing and trust infrastructure that connects data originators — providers, payers, and other health systems — to applications and platforms that ultimately serve patients, enabling interoperability at scale across the ecosystem. For purposes of this specification, "Network" refers specifically to a Health Information Network recognized by CMS as meeting the obligations defined herein.</p>
+      <div class="callout warn">
+        <span class="label">Contested — Definition Review</span>
+        <p>Consider aligning this definition to 45 CFR 171.102, which defines a Health Information Network or Health Information Exchange as:</p>
+        <p>An individual or entity that determines, controls, or has the discretion to administer any requirement, policy, or agreement that permits, enables, or requires the use of any technology or services for access, exchange, or use of electronic health information:</p>
+        <ol>
+          <li>Among more than two unaffiliated individuals or entities (other than the individual or entity to which this definition might apply) that are enabled to exchange with each other; and</li>
+          <li>That is for a treatment, payment, or health care operations purpose, as such terms are defined in 45 CFR 164.501 regardless of whether such individuals or entities are subject to the requirements of 45 CFR parts 160 and 164.</li>
+        </ol>
+        <p>Aligning to 45 CFR 171.102 would ground the spec's network definition in existing regulatory text and may affect which entities are in scope as Networks.</p>
+      </div>
+      <p><strong>Home Network.</strong> The single Network through which a given participant (app, data
+      holder, delegated tech solution) is onboarded and held to be in good standing.</p>
+      <div class="callout warn">
+        <span class="label">Contested — Architecture Decision</span>
+        <strong>The "home network" model is not yet agreed.</strong>
+        The current spec assumes a home-network gating architecture: every app or tech solution connects to the ecosystem via a designated home Network that vouches for it and performs cross-network operations on its behalf. This assumption is contested.
+        <br><br>
+        <strong>Camp A (current spec model):</strong> Apps connect via a home Network. The home Network onboards the app, establishes its good standing, and acts as the trust anchor and routing intermediary for cross-network queries. Other Networks respond because the home Network vouches for the app — not because they have a direct relationship with it.
+        <br><br>
+        <strong>Camp B (direct-connect model):</strong> The architecture should allow apps to connect on their own steam directly to all Networks. Apps may choose to outsource cross-network operations to a Network operator as a convenience, but the architecture should not require home-network gating as a structural constraint. Trust should be derivable from federal credentials alone, without a home Network intermediary in the path.
+      </div>
+      <div class="callout">
+        <span class="label">TODO — Working Group</span>
+        Resolve the home-network architecture question before this spec progresses. Specifically: Is a designated home Network a structural requirement of the ecosystem, or an optional operational convenience? The answer affects §§ 4.3, 7.1, 7.2, and the Connectivity Pathways (§ 5) throughout.
+      </div>
+      <p><strong>Data Holder.</strong> A HIPAA covered entity (provider organization or payer) that
+      holds patient records and exposes them via a network.</p>
+      <p><strong>Connector.</strong> A tech solution or intermediary that initiates a targeted query
+      against a specific endpoint identified in NPD — for example, when a payer has evidence
+      (e.g., a received claim) that a patient's data resides at a particular provider endpoint.
+      Connectors have direct query rights under applicable HIPAA authority.</p>
+      <p><strong>Tech Solution.</strong> A patient-facing application, third-party delegated software,
+      or other ecosystem participant that originates queries.</p>
+      <p><strong>Federal Trust Signal.</strong> A federally grounded credential or attestation that
+      travels with an actor (e.g., ONC certification, CARIN Code of Conduct, DirectTrust accreditation,
+      DiME seal, IAL2 verification, Medicare App Library listing, NPD listing, HIPAA covered-entity
+      status, X.509 credential).</p>
+      <p><strong>Good Standing.</strong> As defined in § 4.3: completed home-network onboarding,
+      current on obligations, no active unresolved complaints, passed operational health checks,
+      not suspended.</p>
+      <p><strong>Inter-Network Settlement.</strong> A commercial arrangement in which one Network
+      compensates another for carrying or fulfilling queries that originate from the first Network's
+      participants — analogous to transit fees or peering settlements in telecommunications.
+      Settlement is prohibited for patient-directed access traffic (§ 14.3) and is optional for
+      other traffic types.</p>
+      <p><strong>NPD.</strong> National Provider Directory. The authoritative public registry of
+      ecosystem participants, endpoints, and inter-network connections.</p>
+      <p><strong>RLS.</strong> Record Locator Service.</p>
+      <p><strong>Use Case.</strong> One of: patient access, treatment, payment, operations, prior
+      authorization, payer-to-payer.</p>
+      <p><strong>Dynamic Client Registration (RFC 7591).</strong> The general IETF OAuth 2.0 mechanism by which a client registers itself with an authorization server programmatically, presenting a signed software statement at the <code>/register</code> endpoint as the <code>software_statement</code> parameter. This is the wire format; the software statement itself can be issued by different authorities (CMS, a CA, or others) representing different trust paths. UDAP is one specific profile that implements dynamic client registration using X.509 certificates; it is not a synonym for dynamic client registration in general.</p>
+      <p><strong>Software Statement (CMS-signed).</strong> A short-lived JWT signed by CMS that asserts a client's status in a CMS-maintained registry and binds it to a verified <code>jwks_uri</code>. Presented as the <code>software_statement</code> parameter during RFC 7591 Dynamic Client Registration. CMS-signed software statements can streamline dynamic registration for many client types — patient-facing apps, payers, providers, delegated tech solutions — as CMS extends its registry coverage. To date, CMS's most concrete commitment is the Medicare App Library for patient-facing apps; the architecture accommodates broader use as that coverage grows.</p>
+      <p><strong>Software Statement (UDAP).</strong> An X.509-anchored signed JWT per the <a href="https://hl7.org/fhir/us/udap-security/">HL7 FAST Security Implementation Guide</a> (HL7 FAST UDAP IG, sometimes called FAST Security) — one specific implementation of RFC 7591 dynamic client registration. Trust is validated against the trust community CA recognized by the CMS-Aligned framework. See § 7.1 for the open architectural question of whether UDAP remains a required path alongside CMS-signed software statements.</p>
+    </section>
+
+    <section id="architecture">
+      <h2><span class="section-anchor">3</span>Architecture Overview</h2>
+      <p>The HTE architecture establishes a <strong>federal floor</strong> that is mandatory for
+      participants who choose to be CMS-Aligned. Above the floor, networks compete and differentiate
+      freely.</p>
+
+      <h3>3.1 Non-Goals</h3>
+      <p>A CMS-Aligned Network is <span class="kw must-not">NOT</span> required to:</p>
+      <ul>
+        <li>sign a common agreement with other networks;</li>
+        <li>share liability with other networks;</li>
+        <li>adopt common pricing or governance.</li>
+      </ul>
+
+      <h3>3.2 What Networks <span class="kw must">MUST</span> Do</h3>
+      <p>Every CMS-Aligned Network <span class="kw must">MUST</span>:</p>
+      <ol>
+        <li>Meet the three core obligations in § 4.</li>
+        <li>Support all three connectivity pathways in § 5.</li>
+        <li>Use the CMS-approved patient matching logic (§ 6).</li>
+        <li>Honor auto-registration and presumptive eligibility for participants in good standing on another home Network (§ 7).</li>
+        <li>Authenticate participants using a federally grounded credential — IAL2 for patient-facing (B2C) flows, a recognized software statement for system-to-system (B2B) flows — no portal login may be required as a precondition (§ 8).</li>
+        <li>Implement authorization per patient preferences (§ 9).</li>
+        <li>Respond to authorized queries completely and without undue obstruction, subject to applicable access controls and authorization requirements (§ 10).</li>
+        <li>Publish to NPD (§ 11).</li>
+        <li>Produce audit logs accessible to patients (§ 12).</li>
+        <li>Maintain HITRUST security validation (§ 13).</li>
+        <li>Comply with the fees floor (§ 14).</li>
+        <li>Remain accountable to CMS for ongoing compliance (§ 15).</li>
+        <li>Attest to the same "rules of the road" of all other CMS-Aligned Networks (§ 17).</li>
+      </ol>
+    </section>
+
+    <section id="obligations">
+      <h2><span class="section-anchor">4</span>The Three Core Obligations</h2>
+
+      <h3 id="obl-1">4.1 Respond to queries for data holders on the network</h3>
+      <p>A Network <span class="kw must">MUST</span> respond when an authorized query reaches the network
+      and a data holder on the network holds matching data, across every Use Case the network's
+      participants engage in. This includes, at minimum, patient access, treatment, and payment
+      queries within applicable use cases.</p>
+      <p>A Network <span class="kw must-not">MUST NOT</span> decline to respond solely because the
+      originating query came from a participant whose home network is different.</p>
+
+      <h3 id="obl-2">4.2 Vouch for participants in good standing</h3>
+      <p>A Network <span class="kw must">MUST</span> maintain the operational status of each of its
+      onboarded participants and <span class="kw must">MUST</span> report good standing (or lack
+      thereof) when queried by another Network or by NPD.</p>
+      <p>A Network <span class="kw must-not">MUST NOT</span> attest to federal legal compliance on
+      behalf of its participants. Operational status only.</p>
+      <p>A Network <span class="kw must">MUST</span> suspend a participant's good-standing report when
+      the participant has been suspended or flagged by the network, or has failed an operational
+      health check that the network publishes.</p>
+
+      <h3 id="obl-3">4.3 Respond to credentialed tech solutions from other home networks</h3>
+      <p>When a tech solution presents valid Federal Trust Signals <strong>and</strong> is reported
+      in good standing on its home Network, the receiving Network <span class="kw must">MUST</span> respond
+      to its queries.</p>
+      <p>The receiving Network <span class="kw must-not">MUST NOT</span> impose duplicative trust gating
+      on top of the Federal Trust Signals and the home-network good-standing report. Operational
+      coordination (abuse contacts, rate-limit coordination, ops contacts, support channels)
+      <span class="kw may">MAY</span> be required.</p>
+
+    </section>
+
+    <section id="pathways">
+      <h2><span class="section-anchor">5</span>Connectivity Pathways</h2>
+      <p>A Network <span class="kw must">MUST</span> support all three of the following pathways. A fourth pathway is <strong>OPTIONAL</strong> and operates outside the CMS-aligned obligation structure.</p>
+
+      <h3 id="path-1">5.1 Pathway 1 — Intranetwork</h3>
+      <p>The Network serves queries against data holders that have contracted directly with the Network as
+      their home network.</p>
+      <h4>Assumptions</h4>
+      <ul>
+        <li>The participant has a direct contract with the Network.</li>
+        <li>The Network is in good standing as CMS-Aligned.</li>
+      </ul>
+      <h4>Conformance</h4>
+      <ul>
+        <li>The Network <span class="kw must">MUST</span> respond to authorized queries for any data holder on the network across applicable use cases.</li>
+      </ul>
+
+      <h3 id="path-2">5.2 Pathway 2 — RLS Network Search ($match)</h3>
+      <p>Discovery uses <code>$match</code> against the published RLS endpoints of other
+      CMS-Aligned Networks. Data retrieval may use either <strong>federated FHIR</strong> (each
+      responder serves its own data directly) or <strong>brokered FHIR</strong> (a network broker
+      aggregates and returns data on behalf of multiple endpoints). Both retrieval modes are
+      conformant.</p>
+      <h4>Assumptions</h4>
+      <ul>
+        <li>Every Network exposes a standardized RLS endpoint at a known address listed in NPD.</li>
+        <li>The endpoint accepts authenticated <code>$match</code> requests from other CMS-Aligned Networks and Apps in the ecosystem.</li>
+        <li>Common patient matching (§ 6) applies.</li>
+      </ul>
+      <h4>Conformance</h4>
+      <ul>
+        <li>A Network <span class="kw must">MUST</span> expose a standardized RLS endpoint at the address published in NPD.</li>
+        <li>A Network <span class="kw must">MUST</span> accept authenticated <code>$match</code> requests from other CMS-Aligned Networks on this endpoint.</li>
+        <li>A Network <span class="kw must">MUST</span> apply the CMS patient matching rule (§ 6) to all queries received via Pathway 2.</li>
+        <li>Data retrieval <span class="kw may">MAY</span> use federated FHIR or brokered FHIR; both are conformant.</li>
+      </ul>
+      <div class="callout">
+        <span class="label">Open Question — For Working Group Discussion</span>
+        <p>The current conformance requirement uses <code>$match</code> as the sole discovery mechanism. Two concerns have been raised:</p>
+        <ol>
+          <li><strong><code>$match</code> has no production use at scale</strong> for cross-network Record Locator Service. It is a FHIR operation designed for single-endpoint patient matching, not multi-site federated discovery.</li>
+          <li><strong>XCPD (Cross-Community Patient Discovery, IHE ITI-55)</strong> has established production use for exactly this purpose and should be considered the floor for cross-network discovery.</li>
+        </ol>
+        <p>Proposed for discussion: Networks <span class="kw should">SHOULD</span> accept either <code>$match</code> <strong>OR</strong> XCPD for cross-network discovery, with conformance testing requirements to be determined. FHIR-based mechanisms (including <code>$match</code>) may be added or substituted as they reach production readiness at scale.</p>
+      </div>
+      <div class="callout warn">
+        <span class="label">Dependency — Legal/Operational — Unresolved</span>
+        The current pathway assumes any CMS-aligned network must provide RLS access to non-participants. Multiple participants have flagged this as a potential HIPAA violation in the absence of a Business Associate Agreement between the data holder and the requesting non-participant. Resolution depends on the legal/operational workstream and is tracked outside this document.
+      </div>
+      <div class="callout warn">
+        <span class="label">Note</span>
+        The exact wire profile of the RLS endpoint, the federation transport, and the
+        authentication scheme between Networks are intentionally left to the CMS Interoperability
+        Framework and the working-group operational profiles. The wire profile for brokered FHIR
+        retrieval is an open question — see Appendix A.
+      </div>
+
+      <h3 id="path-3">5.3 Pathway 3 — Targeted Queries Against NPD</h3>
+      <p>The connector queries a specific endpoint by NPI (or equivalent identifier) listed in NPD,
+      when there is evidence the patient has data at that endpoint (e.g., a payer that received a
+      claim from a specific provider). Unlike Pathway 2, Pathway 3 applies when the connector
+      already has evidence of the patient's data location and queries that endpoint directly,
+      without using RLS discovery.</p>
+      <h4>Assumptions</h4>
+      <ul>
+        <li>The connector has direct query rights under HIPAA right of access, treatment/payment/operations purpose of use, or other applicable legal authority.</li>
+        <li>NPD listing is authoritative for endpoint discovery.</li>
+      </ul>
+      <h4>Conformance</h4>
+      <ul>
+        <li>A Network <span class="kw must">MUST</span> publish its participants' endpoints to NPD in a form that supports targeted queries by NPI or equivalent identifier.</li>
+      </ul>
+      <div class="callout">
+        <span class="label">Note</span>
+        <p>Rate-limiting and discovery-pattern constraints apply to network-mediated queries (Pathway 2), where the Network is in the query path. In Pathway 3, the connector queries an endpoint directly without Network intermediation; unbounded discovery patterns are governed by endpoint-level controls at the receiving data holder, not by the Network. The specific endpoint-level constraint mechanism is an open question — see Appendix A.</p>
+      </div>
+
+      <h3 id="path-4">5.4 Pathway 4 — Bilateral Network-to-Network Peering Agreement <span class="kw optional">OPTIONAL</span></h3>
+      <p>Two networks enter a direct contractual arrangement to exchange data with each other, independent of any CMS-aligned obligation. Each network decides whether to communicate with the other; the arrangement is purely voluntary and bilateral.</p>
+      <h4>Assumptions</h4>
+      <ul>
+        <li>The peering agreement is negotiated bilaterally between the two networks and is not required by CMS-Aligned status.</li>
+        <li>The contract governs the terms of communication, settlement, transit, and SLAs between the two networks.</li>
+        <li>Neither network's CMS-aligned obligations are fulfilled or affected by this arrangement.</li>
+      </ul>
+      <h4>Conformance</h4>
+      <ul>
+        <li>A Network <span class="kw may">MAY</span> enter into bilateral peering agreements with other networks at its discretion.</li>
+        <li>A Network <span class="kw must-not">MUST NOT</span> rely solely on a Pathway 4 arrangement to satisfy its obligations under § 4, because the peering is voluntary and either party may withdraw.</li>
+      </ul>
+    </section>
+
+    <section id="matching">
+      <h2><span class="section-anchor">6</span>Patient Matching</h2>
+      <p>A Network <span class="kw must">MUST</span> implement the CMS-approved patient matching logic
+      specified in the CMS Interoperability Framework. The current MVP standard is the
+      <strong>26-combination matching rule</strong>.</p>
+      <p>A Network <span class="kw must">MUST</span> respond when a query received via any pathway in
+      § 5 matches a patient record across any of the 26 specified combinations, provided that
+      authorization requirements under § 9 are satisfied. A match result alone does not create
+      a response obligation if authorization has not been granted.</p>
+      <blockquote>
+        <p>The exact field list and combination matrix are explained in a different specification, not duplicated here. Will link when it's available.</p>
+      </blockquote>
+    </section>
+
+    <section id="auto-reg">
+      <h2><span class="section-anchor">7</span>Auto-Registration &amp; Presumptive Eligibility</h2>
+
+      <h3>7.1 Auto-Registration</h3>
+      <p>Registration at any Network data holder uses <a href="https://www.rfc-editor.org/rfc/rfc7591">RFC 7591 Dynamic Client Registration</a> as the shared wire format. A client presents a signed software statement at the <code>/register</code> endpoint as the <code>software_statement</code> parameter. RFC 7591 is the mechanism; the software statement is the trust signal. Different issuers of software statements represent different trust paths — they share the same wire format but are not interchangeable.</p>
+
+      <p><strong>CMS-signed software statements</strong> can streamline dynamic registration for <em>many kinds of clients</em> — patient-facing apps, payers, providers, delegated tech solutions, and networks acting as clients — without requiring CMS to operate a CA or issue X.509 certificates. A CMS-signed software statement is a short-lived JWT (e.g., 24-hour TTL) signed by CMS that asserts a client's status in a CMS-maintained registry and binds it to a verified <code>jwks_uri</code>. A receiving authorization server can accept it without per-network re-vetting. To date, CMS's most concrete commitment is listing patient-facing apps in the <strong>Medicare App Library</strong> — that is an important and well-scoped starting point. The architecture of this spec does not treat it as the ceiling: as CMS extends registry coverage to other actor types, the same mechanism applies. See Josh Mandel, "Software Statements for the Medicare App Library," May 26, 2026.</p>
+
+      <p>A Network <span class="kw must">MUST</span> accept a valid CMS-signed software statement as sufficient for dynamic client registration, without additional per-network vetting, for any client type for which CMS has published a registry and issued a statement.</p>
+
+      <div class="callout warn">
+        <span class="label">Contested — Architecture Decision</span>
+        <strong>Should UDAP / X.509 remain as a required or alternate dynamic registration path?</strong>
+        <a href="https://www.udap.org/udap-ig-b2b-health-apps">UDAP</a> is a specific profile of RFC 7591 dynamic client registration that uses X.509 certificates issued by a trust-community CA. It addresses the same core problem as CMS-signed software statements — enabling a client to be recognized across multiple Data Holders without bilateral out-of-band agreements — but via a CA-anchored certificate chain rather than a CMS-issued JWT. Having two mechanisms that address the same problem creates implementation complexity. The question of whether UDAP / X.509 should remain a required path, an optional path, or be superseded by CMS software statements as CMS registry coverage grows is unresolved and must be decided by the working group before this section is finalized.
+      </div>
+
+      <p>All recognized credential types reduce to RFC 7591 plumbing at the receiving authorization server. The server <span class="kw should">SHOULD</span> route signature validation by issuer: CMS published JWKS for CMS-signed software statements; UDAP trust community CA chain for UDAP software statements (if UDAP is retained as a recognized path).</p>
+      <p>When a participant has been onboarded by one home Network using a recognized credential type, every other Network <span class="kw must">MUST</span> register that participant on a defined timeline without redundant onboarding.</p>
+      <p>The timeline is set by the CMS Interoperability Framework.</p>
+      <p>A Network <span class="kw must-not">MUST NOT</span> impose duplicative trust gating on top of the federally grounded credentials. Operational coordination (abuse contacts, rate-limit, security procedures, support channels) <span class="kw may">MAY</span> be coordinated.</p>
+
+      <h3>7.2 Presumptive Eligibility</h3>
+      <p>A participant that has met its trust requirements and is in good standing on one home Network
+      <span class="kw must">MUST</span> be allowed by other Networks to operate for a default
+      <strong>90-day</strong> presumptive-eligibility period without redundant onboarding.</p>
+      <p>After 90 days, presumptive eligibility transitions to ongoing recognition unless there is
+      specific cause to suspend.</p>
+      <p>Three conditions are required:</p>
+      <ol>
+        <li>The participant meets the trust requirements applicable to its actor type.</li>
+        <li>The home Network's onboarding establishes that the participant works in production.</li>
+        <li>The participant is in good standing on the home Network.</li>
+      </ol>
+      <p>A Network <span class="kw may">MAY</span> suspend presumptive eligibility for cause, including
+      operational abuse, security incidents, or a good-standing downgrade on the home Network. A Network
+      that suspends <span class="kw must">MUST</span> report the suspension to NPD and to the home
+      Network.</p>
+    </section>
+
+    <section id="authentication">
+      <h2><span class="section-anchor">8</span>Authentication</h2>
+      <p>Authentication establishes that the party making a request is who they claim to be. The model differs between patient-facing (B2C) and system-to-system (B2B) flows. A Network, and every EHR or data holder it routes to, <span class="kw must">MUST</span> respond to authorized queries from properly credentialed parties without requiring portal login as a precondition — the credential models below are the accepted authentication path; portal login is not.</p>
+
+      <h3>8.1 Patient Access — B2C (IAL2 + SMART App Launch)</h3>
+      <p>For patient-directed access, identity is established via IAL2 identity verification through a CMS-approved credential service provider (CSP) — such as CLEAR or ID.me — combined with app authorization via SMART App Standalone Launch.</p>
+      <p><strong>Reference Implementation — IAL2 with Manual Authorization (SMART App Standalone Launch)</strong></p>
+      <p>This flow modifies the SMART App Launch v2.2.0 Standalone Launch pattern to support IAL2
+      patient identity. Three trust pillars are required:</p>
+      <ol>
+        <li><strong>Patient Authentication (IAL2).</strong> The patient is identity-proofed by a CMS-approved CSP
+        (e.g., CLEAR, ID.me, or a state-issued digital ID card). The CSP issues a high-assurance
+        <code>id_token</code> cryptographically proving the patient's verified identity.</li>
+        <li><strong>Application Authentication (Asymmetric).</strong> The trusted app uses Private Key JWT
+        authentication (RS384 or ES384). The app publishes a JWKS URL; the authorization server
+        validates the app's signature against the corresponding public key.</li>
+        <li><strong>Patient Consent (Authorization Server UI).</strong> Because the IAL2 token establishes identity but
+        not authorization, the authorization server renders its native SMART App Launch consent UI
+        so the patient explicitly approves the requested granular FHIR scopes. No portal login is
+        required — the login screen is bypassed because the IAL2 <code>id_token</code> is already present.</li>
+      </ol>
+      <p><strong>Flow summary</strong></p>
+      <p>The app generates a <code>client_assertion</code> JWT (signed with its private key) that nests the CSP-issued
+      IAL2 <code>id_token</code> within a <code>cms_smart</code> extension (<code>version: "2"</code>, <code>purpose_of_use: "PATRQT"</code>). The
+      authorization request MUST use <code>POST /authorize</code> (<code>application/x-www-form-urlencoded</code>) — GET
+      is not permitted because the nested token makes the payload too large for a query string (risk of
+      HTTP 414). The authorization server validates the app's signature via its published JWKS and
+      validates the IAL2 <code>id_token</code>, then bypasses the login screen and renders the consent UI. After
+      the patient approves the requested FHIR scopes, the server issues an authorization code. The
+      app exchanges it via <code>POST /token</code> with PKCE (<code>code_challenge_method: S256</code>) and a fresh
+      <code>client_assertion</code>.</p>
+      <p>This flow is the current reference pattern for SMART App Standalone Launch. The <code>cms_smart</code>
+      extension is updated to version "2" under § 9.2.1 to accommodate a consent artifact — the
+      login-bypass mechanism described here remains unchanged.</p>
+
+      <h3>8.2 Provider and Payer Access — B2B</h3>
+      <p>For system-to-system access by providers and payers, authentication uses the payer-initiated B2B integration pattern grounded in the trust signals established at registration (§ 7). The current reference implementation uses UDAP B2B flows; whether UDAP remains the required mechanism or is joined or superseded by CMS-signed software statements for B2B client types is an open architectural question — see § 7.1.</p>
+      <p><strong>Reference Implementation — B2B System-to-System Integration</strong></p>
+      <p><strong>Primary pattern — SMART Backend Services + direct FHIR queries</strong></p>
+      <p>All system-to-system B2B access uses SMART on FHIR Backend Services (OAuth 2.0 Client
+      Credentials Grant). The requesting system authenticates to the data holder's authorization
+      server by presenting a signed JWT client assertion against a published JWKS, obtains a
+      short-lived access token, and queries the data holder's FHIR API directly using standard
+      RESTful requests (e.g., <code>GET /Patient/{id}</code>, <code>GET /Observation?patient={id}</code>). No user-facing
+      login is involved.</p>
+      <p>This pattern is the floor for all B2B use cases — treatment, payment, operations, prior
+      authorization, and payer-to-payer.</p>
+      <p><strong>Optional — CDex Task pattern for payer-initiated attachment requests</strong></p>
+      <p>For use cases requiring asynchronous, payer-initiated clinical attachment requests (e.g.,
+      claim attachment workflows under CMS-0057-F), the HL7 CDex FHIR Task pattern MAY be
+      used in place of direct synchronous queries. Under this pattern the network acts as
+      intermediary: the payer submits a CDex-profiled FHIR Task to the network (<code>POST /Task</code>),
+      the network performs a governance check and fulfills the task by querying the provider's
+      FHIR API, then delivers the result to the payer via <code>POST /$submit-attachment</code>. Each
+      leg uses the same SMART Backend Services authentication described above.</p>
+      <p><strong>Standards:</strong> SMART on FHIR Backend Services, OAuth 2.0 Client Credentials Grant, HL7 FHIR
+      RESTful API, HL7 CDex (optional, for asynchronous attachment workflows).</p>
+      <div class="callout"><span class="label">TODO</span>The following are not specified for the B2B flow and must be defined before implementation: access token lifetime, refresh token behavior, credential rotation requirements, error handling on authentication failure, and retry policy.</div>
+    </section>
+
+    <section id="authorization">
+      <h2><span class="section-anchor">9</span>Authorization</h2>
+
+      <h3>9.0 Required Precondition: Network-Mediated Record Location</h3>
+      <p>Patient access depends first on record location.</p>
+      <p>Every CMS-Aligned Network <span class="kw shall">SHALL</span> support network-mediated record location or source discovery for patient access.</p>
+      <p>For July 4, 2026:</p>
+      <ol>
+        <li>A CMS-recognized patient-facing app listed in the CMS Medicare App Library <span class="kw shall">SHALL</span> be able to initiate record location through each CMS-Aligned Network or through its CMS-Aligned Network.</li>
+        <li>The app <span class="kw shall">SHALL</span> authenticate as itself via a CMS-signed software statement from the CMS Registry (proposed solution under review — see § 7.1).</li>
+        <li>The app <span class="kw shall">SHALL</span> present a valid IAL2 patient identity token from a CMS-approved digital identity service provider (CSP).</li>
+        <li>The network <span class="kw shall">SHALL</span> process the record-location request based on app authentication and IAL2 patient identity alone, subject to patient matching, applicable law, and security controls.</li>
+        <li>The patient <span class="kw shall-not">SHALL NOT</span> be required to interact separately with the network or its data holders to complete record location.</li>
+        <li>The patient <span class="kw shall-not">SHALL NOT</span> be required to know which providers, payers, facilities, or networks hold their records before initiating discovery.</li>
+        <li>Each CMS-Aligned Network <span class="kw shall">SHALL</span> respond for the participating data holders it represents.</li>
+        <li>The record-location response <span class="kw shall">SHALL</span> provide enough information for the app to pursue patient-access data retrieval through the applicable patient approval path below.</li>
+        <li>The CMS-recognized patient-facing app (directly or through its CMS-Aligned Network) maintains audit logs covering the scope and duration of the individual's authorization to the app to continue retrieving their data.</li>
+      </ol>
+
+      <h3>9.1 Required Conditions for All Paths</h3>
+      <p>Every access path <span class="kw shall">SHALL</span> satisfy all four of the following conditions before data retrieval may proceed. Each path below lists only what that path additionally requires beyond this shared foundation.</p>
+      <ol>
+        <li>The app is recognized by CMS or listed through a CMS-recognized app process and maintained within a CMS registry.</li>
+        <li>The app authenticates as itself through a mechanism accepted by the network or data holder (proposed solution under review: CMS-signed software statement from CMS Registry — see § 7.1).</li>
+        <li>The app presents a valid IAL2 patient identity token.</li>
+        <li>The request indicates that the purpose is HIPAA right of patient access, using the purpose-of-use code <code>PATRQT</code> as adopted for the ecosystem.</li>
+      </ol>
+
+      <h3>9.2 Patient Authorization Paths</h3>
+
+      <h4>9.2.1 Path 1 — Preferred: CMS-Recognized App + IAL2 Patient Identity (SHOULD)</h4>
+      <p>Pledged Networks, EHRs, and data holders <span class="kw should">SHOULD</span> support this path, in which a CMS-recognized patient-facing app in good standing can obtain patient-access FHIR API tokens without separate app onboarding at each data holder and without provider portal login.</p>
+      <p>All four conditions in § 9.1 apply. Additionally, under this path:</p>
+      <ol start="5">
+        <li>The app requests access to the data needed for the patient's use case or as specified by the patient, consistent with the data holder's supported FHIR capabilities.</li>
+        <li>The data holder or network approval service issues a FHIR API token for the requested and supported access, subject to applicable law, patient matching, local restrictions, supported capabilities, and security controls.</li>
+        <li>The patient is not required to use a provider portal, create a site-specific account, or know which provider holds which records.</li>
+        <li>The app is not required to complete separate developer onboarding with data holders (registration steps may occur at the network or EHR level).</li>
+      </ol>
+      <p>For July, the trust basis is CMS app recognition, app authentication, IAL2 patient identity, patient-access purpose, requested access, and auditability.</p>
+      <p>This path places meaningful trust in CMS-recognized apps. That trust <span class="kw should">SHOULD</span> be paired with monitoring, good-standing review, auditability, and post-July work toward stronger approval artifacts.</p>
+
+      <p><strong>Consent Artifact for Path 1</strong></p>
+      <p>To support path 1, the <code>cms_smart</code> extension is updated to version "2" to include a <code>consent_reference</code> element carrying a FHIR Bundle that represents the patient's recorded preferences. The bundle <span class="kw shall">SHALL</span> contain:</p>
+      <table>
+        <thead><tr><th>Element</th><th>Cardinality</th><th>Requirement</th></tr></thead>
+        <tbody>
+          <tr><td>Consent</td><td>1..1</td><td>Consent resource outlining the permission/denial characteristics</td></tr>
+          <tr><td>Patient</td><td>1..1</td><td>US-Core Profiled Patient Resource. <span class="kw shall">SHALL</span> be referenced by the Consent resource and contain an identifier with system = <code>iss</code> and value = <code>uuid</code> from the corresponding <code>id_token</code>. Data holders <span class="kw shall">SHALL</span> validate the system/value combination.</td></tr>
+          <tr><td>QuestionnaireResponse</td><td>1..1</td><td>Response to items on the CMS-hosted consent questionnaire (linked by <code>linkId</code>)</td></tr>
+          <tr><td>Provenance</td><td>1..1</td><td>Provenance referencing the Consent resource</td></tr>
+        </tbody>
+      </table>
+      <p>The <code>cms_smart</code> extension for Path 1 requests:</p>
+      <table>
+        <thead><tr><th>Element</th><th>Optionality</th><th>Requirement</th></tr></thead>
+        <tbody>
+          <tr><td><code>version</code></td><td>Required</td><td>Fixed string value: <code>"2"</code></td></tr>
+          <tr><td><code>purpose_of_use</code></td><td>Required</td><td>Fixed value: <code>"PATRQT"</code></td></tr>
+          <tr><td><code>consent_policy</code></td><td>Optional</td><td>Not defined for initial implementation</td></tr>
+          <tr><td><code>consent_reference</code></td><td>Required</td><td>Bundle as described above</td></tr>
+          <tr><td><code>id_token</code></td><td>Required</td><td>CSP-issued ID token containing identity assertions. <span class="kw must">MUST</span> be IAL2.</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Sensitive and Restricted Data</strong></p>
+      <p>"Sensitive / Restricted Information" means information whose disclosure or retransmission may be restricted by the Data Holder's information security policies, including restrictions arising from applicable federal, state, local, tribal, or territorial laws and regulations.</p>
+      <p>An Application <span class="kw may">MAY</span> request a patient's consent to access Sensitive / Restricted Information. If an Application obtains such consent, it <span class="kw shall">SHALL</span> communicate the result to the Data Holder in the access token request using a Consent resource. If an Application does not request consent for Sensitive / Restricted Information, the Consent resource <span class="kw shall">SHALL</span> contain a provision indicating denial of access to restricted information.</p>
+      <p>A Data Holder <span class="kw shall">SHALL</span> treat a positive consent conveyed through a Consent resource as authorization to disclose Sensitive / Restricted Information, except where disclosure is prohibited by applicable laws or regulations.</p>
+      <p>If an access token request does not include a Consent resource conveying positive consent for Sensitive / Restricted Information, the Data Holder <span class="kw may">MAY</span> withhold or exclude such information.</p>
+
+      <p><strong>Alternative to Consent Artifact: SMART Permission Tickets (under review)</strong></p>
+      <p>As an alternative to the <code>cms_smart</code> consent bundle, a network or CMS-recognized issuer <span class="kw may">MAY</span> issue a SMART Permission Ticket — a signed JWT that binds the patient identity, the requesting app, the authorized FHIR scopes, and an expiration. Data holders that receive a valid SMART Permission Ticket <span class="kw may">MAY</span> issue a FHIR API token without a per-data-holder authorization screen. The specific ticket profile and issuance mechanism are under working group review; the spec will be updated when a profile is adopted.</p>
+
+      <h4>9.2.2 Path 2 — Allowed Alternative: Network-Level Consolidated Patient Approval (MAY)</h4>
+      <p>If a data holder cannot meet all criteria of Path 1, it <span class="kw may">MAY</span> rely on a network-level consolidated patient approval flow. All four conditions in § 9.1 apply. Additionally:</p>
+      <ol start="5">
+        <li>The approval applies across participating data holders within that network.</li>
+        <li>The patient is not required to complete a separate approval screen for every data holder. Patients <span class="kw should">SHOULD</span> be able to approve access to all FHIR resources by default (preferably "select all, uncheck by exception").</li>
+        <li>The network conveys enough information about the patient's app for participating data holders to evaluate and trust that this app was the patient's choice.</li>
+        <li>The network logs the approval and access events for audit and patient transparency.</li>
+      </ol>
+      <p>This path will be allowable through December 31, 2026 and will <strong>NOT</strong> be supported after that date.</p>
+
+      <h4>9.2.3 Path 3 — July Bridge: Data Holder-Specific Patient Approval (MAY)</h4>
+      <p>A data holder <span class="kw may">MAY</span> rely on a data holder-specific patient approval flow as a July bridge. All four conditions in § 9.1 apply. Additionally:</p>
+      <ol>
+        <li>The data holder <span class="kw shall-not">SHALL NOT</span> require portal credentials.</li>
+        <li>The approval screen <span class="kw should">SHOULD</span> be limited to approving the app and requested access.</li>
+        <li>The app <span class="kw shall-not">SHALL NOT</span> be required to complete separate developer onboarding per-data-holder in the network.</li>
+        <li>The data holder or network <span class="kw shall">SHALL</span> identify what would be needed to move beyond the July Bridge path.</li>
+        <li>If an application has obtained blanket consent from a patient for access to their entire health record, the application <span class="kw may">MAY</span> automate authorization screens returned by data holders for that patient.</li>
+      </ol>
+      <p>This path <span class="kw must">MUST</span> be sunset by November 1, 2026. It should not be treated as the target ecosystem pattern.</p>
+
+      <h3>9.3 Required July Outcome</h3>
+      <p>By July 4, 2026, a CMS-recognized patient-facing app in good standing, acting for an IAL2-verified patient, <span class="kw must">MUST</span> be able to:</p>
+      <ol>
+        <li>Discover where the patient has records across CMS-Aligned Networks.</li>
+        <li>Request patient-access FHIR API tokens from participating data holders.</li>
+        <li>Retrieve supported patient data through FHIR APIs.</li>
+        <li>Do so without provider portal login as the primary access path.</li>
+        <li>Do so without separate developer onboarding at every data holder.</li>
+        <li>Produce audit records sufficient for patient-facing transparency.</li>
+      </ol>
+      <p>Networks and data holders <span class="kw shall">SHALL</span> document which patient approval path they support. Networks and data holders <span class="kw should">SHOULD</span> report adoption metrics by path so CMS and the ecosystem can see where bridge patterns remain.</p>
+
+      <h3>9.4 Post-July Direction</h3>
+      <p>After July, CMS and working groups <span class="kw should">SHOULD</span> focus on higher-assurance approval mechanisms that reduce reliance on data-holder-specific screens. Candidate approaches include:</p>
+      <ul>
+        <li>CSP-assisted approval claims: a credential service provider participates in conveying that the patient approved a specific app to request access.</li>
+        <li>SMART Permission Tickets: a trusted issuer (network, CSP, or CMS-recognized authority) issues a signed artifact that the app presents to data holders.</li>
+        <li>Network-issued portable approval artifacts: a CMS-Aligned Network operates the consolidated approval flow and issues a portable artifact that participating data holders can validate.</li>
+      </ul>
+      <p>The long-term target is a cross-ecosystem pattern where the patient proves identity once, chooses an app, the app discovers records across CMS-Aligned Networks, and data holders can evaluate a trusted approval signal without portal login or repeated site-specific burden.</p>
+
+      <h3>9.5 Token Validation Requirements</h3>
+      <h4>On Authorization</h4>
+      <ul>
+        <li>A data holder responding to an IAS request that contains an <code>id_token</code> <span class="kw shall">SHALL</span> verify the relationship between the audience (<code>aud</code>) of the <code>id_token</code> and the presenting application. <em>(Specifics to be added depending on cert vs. software statements route choice.)</em></li>
+        <li>The data holder <span class="kw shall-not">SHALL NOT</span> issue an access token if the incoming <code>id_token</code> contains an <code>auth_time</code> claim indicating the original user authentication occurred more than 300 seconds prior to the current request.</li>
+        <li>To prevent replay attacks, the data holder <span class="kw shall">SHALL</span> validate the identifier of the <code>id_token</code> for uniqueness. The data holder <span class="kw shall-not">SHALL NOT</span> accept an <code>id_token</code> if the combination of the JWT ID (<code>jti</code>) and Issuer (<code>iss</code>) claims has already been processed within the token's validity window.</li>
+      </ul>
+
+      <h4>Access Tokens and Refresh Tokens</h4>
+      <ol>
+        <li>Access tokens issued by a data holder <span class="kw shall">SHALL</span> support renewal via refresh tokens on a rolling 90-day basis.</li>
+        <li>The rolling 90-day expiration window <span class="kw shall">SHALL</span> reset upon each successful token refresh.</li>
+        <li>Access tokens <span class="kw shall">SHALL</span> have a valid lifetime no greater than one hour.</li>
+      </ol>
+    </section>
+
+    <section id="query">
+      <h2><span class="section-anchor">10</span>Query / Data Exchange</h2>
+
+      <div class="callout warn">
+        <span class="label">TODO</span>
+        <strong>§ 10.3 Purpose of Use Propagation</strong> below straddles Authorization and Query / Data Exchange. The PoU declaration requirement and the code table arguably belong in Authorization (§ 9) as a gate on access; the propagation rule ("PoU MUST travel with the request to downstream systems") and the MUST NOT impose additional requirements sentence arguably belong here as query-handling rules. The subsection has been left in § 10 pending a reviewer decision on where the cut falls.
+      </div>
+
+      <h3>10.1 Respond Completely</h3>
+      <p>When a query is authorized, the response <span class="kw must">MUST</span> include all relevant data
+      the responder holds for the patient, structured and unstructured, within the applicable Use
+      Case.</p>
+      <p>The minimum data scope for structured data is <strong>USCDI v3</strong> (or the version
+      current at the time of the query, as specified by the CMS Interoperability Framework).
+      Unstructured artifacts within USCDI v3 scope (clinical notes, scanned PDFs, imaging reports,
+      encounter documents) <span class="kw must">MUST</span> be included where they exist. Artifact
+      types beyond USCDI v3 scope (faxes, ambient listening recordings) <span class="kw should">SHOULD</span>
+      be included where they exist and where a standard exchange mechanism is available.</p>
+      <div class="callout">
+        <span class="label">Note</span>
+        <p>No standard currently exists for exchanging ambient listening recordings (e.g., wav/mp3 via DocumentReference). Many organizations do not persist recordings after transcription is complete. The exchange profile for ambient recordings is TBD. "Faxes" means a document-formatted copy (e.g., PDF) where one exists — raw fax transmission is not required.</p>
+      </div>
+      <p>USCDI v3 defines the <strong>superset</strong> of data elements that a Network and its Data Holders must be capable of returning — it is not a guarantee that every element is returned on every call. The actual data in any given response is a subset determined by three factors:</p>
+      <ul>
+        <li><strong>The specific query.</strong> A request for a particular FHIR resource type (e.g., <code>MedicationRequest</code>) returns only that resource, not the full USCDI element set.</li>
+        <li><strong>Authorized scopes.</strong> The requesting app's granted scopes constrain which resource types and fields are accessible in that session. Scopes are granted and validated by the <strong>Data Holder's authorization server</strong> — the Network is not the source of truth for what an app may access.</li>
+        <li><strong>Use-case-specific constraints.</strong> Some use cases carry inherent limits on the data window — for example, a payer may be restricted to clinical data supporting claims from the last 60 days, or to data associated with a specific encounter, even when it holds broader USCDI access rights.</li>
+      </ul>
+      <p>"Supports USCDI v3" means the capability is present and conformant; it does not mean all USCDI elements are returned on every call.</p>
+      <blockquote><p>No use case becomes a dead end.</p></blockquote>
+
+      <h3>10.2 Use Case Coverage</h3>
+      <p>A Network <span class="kw must">MUST</span> respond to queries from the actor categories that
+      apply to the use cases its participants engage in:</p>
+      <ul>
+        <li>patients seeking their own records;</li>
+        <li>providers requesting clinical and claims data for treatment;</li>
+        <li>payers (where applicable) requesting clinical data supporting claims from the last 60 days;</li>
+        <li>payers querying for quality measure reporting;</li>
+        <li>prior authorization queries (subject to CMS-0057-F deadlines).</li>
+      </ul>
+      <p>If a network's participants engage in a use case, the network <span class="kw must">MUST</span>
+      support queries for that use case.</p>
+
+      <h3>10.3 Purpose of Use Propagation</h3>
+      <p>Every data request <span class="kw must">MUST</span> declare why the data is being accessed.
+      A Network <span class="kw must">MUST</span> support the HL7 Purpose of Use code set and apply the
+      correct disclosure rules to each category.</p>
+      <p>The following codes are <span class="kw required">REQUIRED</span>, aligned to the approved
+      use cases in § 10.2:</p>
+      <table>
+        <thead>
+          <tr><th>Code</th><th>Display</th><th>Level</th><th>Use case</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>PATRQT</code></td><td>Patient request</td><td>Granular</td><td>Patient access</td></tr>
+          <tr><td><code>TREAT</code></td><td>Treatment</td><td>High level</td><td>Treatment</td></tr>
+          <tr><td><code>HPAYMT</code></td><td>Healthcare payment</td><td>High level</td><td>Payment (including claims)</td></tr>
+          <tr><td><code>CLMATTCH</code></td><td>Claim attachment</td><td>Granular</td><td>Claim attachment within payment</td></tr>
+          <tr><td><code>HOPERAT</code></td><td>Healthcare operations</td><td>High level</td><td>Health care operations</td></tr>
+          <tr><td><code>HQUALIMP</code></td><td>Healthcare quality improvement</td><td>Granular</td><td>Quality measure reporting within operations</td></tr>
+        </tbody>
+      </table>
+      <p>Purpose of use <span class="kw must">MUST</span> travel with the request to downstream
+      systems.</p>
+      <p>When the requesting party is trusted and the purpose of use is properly declared, a Network
+      and its participants <span class="kw must-not">MUST NOT</span> impose additional authorization
+      requirements on top. However, patients <span class="kw may">MAY</span> restrict the data
+      categories an app can access, and a Network <span class="kw must">MUST</span> honor those
+      restrictions. Patient-scoped restrictions are defined in § 9 (Authorization) and take
+      precedence over this requirement.</p>
+
+      <h3>10.4 Patient-Contributed Data</h3>
+      <p>Patient-contributed data (patient-reported outcomes, notes, home device readings, lifestyle
+      data) is a planned Phase 2 capability. The write-side obligations — data holder acceptance,
+      format, tagging as patient-contributed, deduplication, and review workflows — are not yet
+      specified and are deferred from v0.3.</p>
+      <p>Networks and data holders <span class="kw should">SHOULD</span> design their APIs to
+      accommodate future patient-write flows. Patient choice governs whether patient-contributed
+      data flows when this capability is implemented.</p>
+    </section>
+
+    <section id="npd">
+      <h2><span class="section-anchor">11</span>National Provider Directory Publication</h2>
+      <p>A Network <span class="kw must">MUST</span> publish to NPD:</p>
+      <ul>
+        <li>its onboarded participants (apps, providers, payers, delegated tech solutions), where "providers" means both provider organizations and individual practitioners affiliated with those organizations;</li>
+        <li>its participants' endpoints in a form that supports Pathway 3 (targeted query by identifier);</li>
+        <li>its inter-network connections;</li>
+        <li>usage metrics by participant and by use case;</li>
+        <li>trust-anchor metadata sufficient for validating any recognized software statement type — specifics are contingent on the architectural decision in § 7.1 (see NOTE below).</li>
+      </ul>
+      <div class="callout">
+        <span class="label">Note</span>
+        <p>The trust-anchor metadata requirement above is contingent on the resolution of the UDAP architectural question in § 7.1. If UDAP is retained as a required path, NPD <span class="kw must">MUST</span> publish the trust community CA URL and any intermediate CA certificates recognized by the CMS-Aligned framework. The specific metadata schema, certificate format, and refresh cadence are deferred until § 7.1 is resolved by the working group. Until that decision is made, this bullet imposes no concrete implementation obligation beyond publishing whatever trust-anchor metadata corresponds to the software statement types the working group adopts.</p>
+      </div>
+      <div class="callout">
+        <span class="label">Note</span>
+        <p>Networks that onboard at the organizational level — and do not directly contract with individual practitioners — satisfy the individual practitioner publication requirement by publishing their onboarded provider organizations with NPI cross-references to the corresponding individual practitioner records in NPPES. A Network is not required to independently verify or replicate individual practitioner data that is already authoritatively maintained in NPPES; it <span class="kw must">MUST</span> publish enough metadata (organization NPI, affiliated practitioner NPIs where known) to support targeted queries by NPI under Pathway 3. Where a network does not hold individual practitioner affiliation data, it <span class="kw should">SHOULD</span> publish that gap alongside its organizational records so queriers know to fall back to NPPES for practitioner-level resolution.</p>
+      </div>
+      <p>A Network <span class="kw must">MUST</span> ingest and publish updates routinely. The
+      ingest/refresh cadence is specified by the CMS Interoperability Framework. This requirement
+      is contingent on CMS providing a scalable NPD ingestion API — see Appendix A, item A7. Until
+      that API is available, Networks <span class="kw should">SHOULD</span> manually submit updates
+      via CMS's current flat-file process.</p>
+      <p>NPD <span class="kw must">MUST</span> also be queryable by any Network, auditor, or participant
+      to confirm an actor's listing and credentials. Trust travels with the actor because it is
+      anchored in NPD as a public, queryable record that any Network can read without bilateral
+      verification.</p>
+    </section>
+
+    <section id="audit">
+      <h2><span class="section-anchor">12</span>Audit Logging</h2>
+      <p>A Network <span class="kw must">MUST</span> produce audit logs for queries on its network,
+      including:</p>
+      <ul>
+        <li>who accessed the data;</li>
+        <li>when;</li>
+        <li>for what declared purpose of use;</li>
+        <li>which organizations were involved.</li>
+      </ul>
+      <p>Audit logs <span class="kw must">MUST</span> be organization-level at minimum. Audit logs <span class="kw must">MUST</span> be kept for a minimum of 7 years, or longer if required by applicable law (45 CFR 164.530(j)).</p>
+      <p>A Network <span class="kw must">MUST</span> facilitate patient-facing audit access so patients
+      can see, through their app, who queried their data. Implementations <span class="kw must">MUST</span>
+      conform to the IAS Audit Log API Specification (v1.0, February 2026), which defines the FHIR
+      AuditEvent resource model, IAL2 OIDC token-based patient authentication, and endpoint discovery
+      via RLS and NPD.</p>
+      <div class="callout">
+        <span class="label">Note</span>
+        <p>Patient-facing audit coverage is scoped to network-mediated queries — those passing through an RLS endpoint (Pathways 1 and 2). Point-to-point queries under Pathway 3 are excluded from this requirement because the network is not in the query path and cannot produce a log of traffic it never sees. This limitation is explicitly acknowledged in the IAS Audit Log API Spec (§1.2): "Point-to-point transactions that do not flow through an RLS" are out of scope. Endpoint-level audit obligations for Pathway 3 are governed by the data holder's own HIPAA audit requirements, not this section.</p>
+      </div>
+      <p>EHRs facilitating ecosystem queries are subject to the same audit obligations as the Network
+      routing through them.</p>
+    </section>
+
+    <section id="security">
+      <h2><span class="section-anchor">13</span>Security</h2>
+      <p>A Network <span class="kw must">MUST</span> maintain <strong>HITRUST certification</strong>, scoped to the network's production environment that creates, receives, maintains, or transmits PHI on behalf of participants. This includes, at minimum, identity verification token validation, query routing, audit log generation, and patient matching reference data storage. Corporate functions that do not touch PHI are out of scope.</p>
+      <p>HITRUST certification does <strong>NOT</strong> replace compliance with HIPAA, the Privacy
+      Act, or applicable federal and state privacy and security laws.</p>
+      <p>Business Associate Agreements (BAAs) <span class="kw may">MAY</span> be required even where
+      data is not directly brokered (for example, when a participant queries an RLS endpoint under
+      Pathway 3). Networks and participants <span class="kw must">MUST</span> confirm their BAA
+      obligations under HIPAA.</p>
+    </section>
+
+    <section id="fees">
+      <h2><span class="section-anchor">14</span>Fees &amp; Economics</h2>
+
+      <h3>14.1 Patient-Directed Access</h3>
+      <p>A Network <span class="kw must-not">MUST NOT</span> structure fees in a way that gates a
+      patient's federal right to access their own data.</p>
+      <p>The Fees exception at <a href="https://www.ecfr.gov/current/title-45/part-171/section-171.302">45 CFR 171.302</a>
+      and the ONC information blocking framework establish this floor. Cost recovery is permitted;
+      platform fees structured to defeat patient access are not.</p>
+
+      <h3>14.2 Above the Floor</h3>
+      <p>A Network <span class="kw may">MAY</span> set its own commercial terms for:</p>
+      <ul>
+        <li>premium services beyond baseline;</li>
+        <li>prior-authorization service offerings under CMS-0057-F;</li>
+        <li>voluntary commercial peering arrangements with other Networks;</li>
+        <li>value-added integration services.</li>
+      </ul>
+
+      <h3>14.3 Inter-Network Settlement</h3>
+      <p>For patient-directed access traffic, inter-network settlement is <strong>NOT</strong>
+      appropriate.</p>
+      <p>For other traffic types (treatment, payment, operations, prior auth, payer-to-payer), Networks
+      <span class="kw may">MAY</span> negotiate commercial peering arrangements with settlement,
+      transit fees, or other terms above the federal floor.</p>
+      <div class="callout warn">
+        <span class="label">Open question</span>
+        Whether a Network may charge a data holder per query for required HTE use cases, and whether a
+        Network may charge a payer per query against a provider on the Network, is not resolved in source
+        documents. See Appendix A.
+      </div>
+    </section>
+
+    <section id="accountability">
+      <h2><span class="section-anchor">15</span>Accountability</h2>
+      <p>A Network is accountable to CMS for meeting the obligations in §§ 3–14. Persistent failure is
+      grounds for delisting from CMS-Aligned status on the same footing as failing any other
+      Framework criterion.</p>
+      <p>A Network <span class="kw must">MUST</span> publish operational metrics (response rates, query
+      volumes, response times by use case) so apps and data holders can comparison-shop and so CMS
+      can monitor adoption and performance. Network performance metrics appear in CMS scorecards
+      (Framework criterion #19).</p>
+      <p>Outages and partial responses happen; the obligation is to meet published response standards
+      over time, not to be perfect.</p>
+    </section>
+
+    <section id="july">
+      <h2><span class="section-anchor">16</span>July 4, 2026 Framework Requirements</h2>
+      <p>By <strong>July 4, 2026</strong>, a Network <span class="kw must">MUST</span> satisfy all four
+      requirements below, as specified in the CMS Interoperability Framework.</p>
+
+      <h3>16.1 FHIR API Access</h3>
+      <p>A Network <span class="kw must">MUST</span> provide or facilitate access to data using FHIR
+      APIs that adhere to the
+      <a href="https://hl7.org/fhir/us/core">HL7 FHIR US Core Implementation Guide</a>, including:</p>
+      <ul>
+        <li>a complete and valid FHIR Capability Statement;</li>
+        <li>USCDI v3 (or later) data elements with terminology compliance — laboratories coded in
+        LOINC, medications in RxNorm, conditions in SNOMED CT.</li>
+      </ul>
+      <p>A Network <span class="kw should">SHOULD</span> leverage
+      <a href="https://hl7.org/fhir/uv/bulkdata">FHIR Bulk Data Exchange</a> to reduce stress on
+      existing systems and enable the exchange of full data records.</p>
+
+      <h3>16.2 Chart Notes and Clinical Documents</h3>
+      <p>A Network <span class="kw must">MUST</span> return chart notes and clinical documents —
+      including radiology reports, scanned or faxed labs, and external specialist notes — in
+      human-readable formats (PDF, TIFF, JPG) as FHIR attachments, as specified in USCDI v3.
+      Ambient listening recordings <span class="kw should">SHOULD</span> be returned where they are
+      persisted and a standard exchange mechanism is available; the exchange profile for ambient
+      recordings is TBD.</p>
+
+      <h3>16.3 Appointment and Encounter Notifications</h3>
+      <p>A Network <span class="kw must">MUST</span> provide appointment and encounter notifications for
+      outpatient, telehealth, emergency department, and inpatient encounters using FHIR Subscriptions,
+      where such notifications are permitted by existing law.</p>
+      <div class="callout warn">
+        <span class="label">Deferred — Not in Scope for July 4, 2026</span>
+        <p>Appointment and Encounter Notifications (§16.3) are not included in the July 4, 2026 GA requirements. The Notifications working group has not met in several months due to unresolved questions on network design and structure. This criterion will be revisited once the home-network architecture question (see §2, Terminology — Home Network contested decision) reaches consensus. Networks are not required to implement §16.3 for initial CMS-Aligned recognition.</p>
+      </div>
+
+      <h3>16.4 Record Locator Service</h3>
+      <p>A Network <span class="kw must">MUST</span> implement record locator functionality by
+      collaborating with CMS to determine efficient and timely models that:</p>
+      <ul>
+        <li>reduce query load on the networks;</li>
+        <li>aid understanding of data completeness.</li>
+      </ul>
+      <p>Requests to the record locator service <span class="kw must">MUST</span> be initiable by
+      patients, providers, payers, and value-based care organizations.</p>
+    </section>
+
+    <section id="rules-attestation">
+      <h2><span class="section-anchor">17</span>Rules of the Road Attestation</h2>
+      <div class="callout">
+        <span class="label">Placeholder</span>
+        The Rules of the Road Attestation are being discussed in the CAN Admin/Ops group and will be input into this document, or another companion guide, when they are complete.
+      </div>
+    </section>
+
+    <hr>
+
+    <section id="open-questions">
+      <h2>Appendix A · Open Questions</h2>
+      <p>These are gaps identified in source materials that this draft does not resolve. They are
+      flagged here so working-group attention can converge.</p>
+      <table>
+        <thead>
+          <tr><th style="width: 50px;">#</th><th>Open Question</th><th>Source</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>A1</td>
+            <td>Wire profile of the standardized RLS / federation endpoint (transport, authentication, payload schema for <code>$match</code> requests and responses).</td>
+            <td>Framework defers; Connectivity Pathways doc notes this is the baseline interface but the operational profile is not fixed.</td>
+          </tr>
+          <tr>
+            <td>A1b</td>
+            <td>Wire profile for brokered FHIR retrieval under Pathway 2 — how a network broker aggregates responses from multiple RLS endpoints and returns them to the requesting Network (payload shape, error handling, partial-response semantics).</td>
+            <td>Introduced by the shift from federated-only to dual retrieval modes in Pathway 2; not yet specified.</td>
+          </tr>
+          <tr>
+            <td>A2</td>
+            <td>Mechanism for preventing endpoint-spamming under Pathway 3 (geo-search constraints, rate limits, query-shape rules).</td>
+            <td>Connectivity Pathways doc explicitly raises this as an unresolved question.</td>
+          </tr>
+          <tr>
+            <td>A3</td>
+            <td>Whether networks may charge data holders per query for required HTE use cases, and the same for payer-to-provider queries.</td>
+            <td>Workgroup Alternative Proposal § 2.3 — raised but not resolved by CMS in source materials.</td>
+          </tr>
+          <tr>
+            <td>A4</td>
+            <td>Definition and scope of the "on-ramp" intermediary role: separate ecosystem role or contracted vendor of the participant?</td>
+            <td>Workgroup Alternative Proposal § 2.2 — raised but not resolved.</td>
+          </tr>
+          <tr>
+            <td>A5</td>
+            <td>Operational profile for auto-registration timeline and the exact handoff between home-network onboarding and presumptive eligibility at receiving networks.</td>
+            <td>HTE Reference doc Part II — "defined timeline" referenced but not specified.</td>
+          </tr>
+          <tr>
+            <td>A6</td>
+            <td>Whether a single "Rules of the Road" document signed by all Networks is the right vehicle for cross-network operational standards, or whether criteria-based participation is sufficient.</td>
+            <td>Workgroup Alternative Proposal § 3.1 vs. HTE Reference doc Part I — disagreement; CMS chose criteria-based.</td>
+          </tr>
+          <tr>
+            <td>A7</td>
+            <td>NPD ingest/refresh cadence, schema, and authoritative trust-registry behavior. NPD currently operates as a static web file requiring manual flat-file submissions — there is no API for routine programmatic ingestion. The MUST in § 11 to ingest and publish updates routinely cannot be met at scale without a CMS-provided ingestion API. This item must be resolved before § 11 can be implemented as written.</td>
+            <td>HTE Reference doc Part II references publication but the operational profile is open.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="sources">
+      <h2>Appendix B · Source Documents Used to Build This Draft</h2>
+      <p>This draft was synthesized from three internal working documents and one public CMS
+      resource. No external sources were invented.</p>
+      <ul>
+        <li><strong>HTE Network Framing Combined Reference (V2 draft).</strong> Part I (the case for the HTE architecture), Part II (Rules of the Road), Part III (trust framework diagram). Internal working document.</li>
+        <li><strong>Connectivity Pathways for Discovery.</strong> Internal working document defining four pathways; this spec adopts three required pathways and one optional pathway (§ 5.4).</li>
+        <li><strong>CMS Networks Workgroup — Meeting Summary and Alternative Ecosystem Proposal.</strong> Internal working document. The alternative was not adopted; cited here for gap identification only.</li>
+        <li><strong>CMS Interoperability Framework.</strong> <a href="https://www.cms.gov/health-technology-ecosystem/interoperability-framework">cms.gov/health-technology-ecosystem/interoperability-framework</a></li>
+      </ul>
+    </section>
+
+    <section id="references">
+      <h2>Appendix C · Normative References</h2>
+      <p>References below appear in source materials. None are invented.</p>
+      <ul>
+        <li><a href="https://www.rfc-editor.org/rfc/rfc2119">RFC 2119</a> — Key words for use in RFCs to Indicate Requirement Levels.</li>
+        <li><a href="https://www.rfc-editor.org/rfc/rfc8174">RFC 8174</a> — Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words.</li>
+        <li><a href="https://www.rfc-editor.org/rfc/rfc7591">RFC 7591</a> — OAuth 2.0 Dynamic Client Registration Protocol.</li>
+        <li><a href="https://hl7.org/fhir/us/udap-security/">HL7 FAST Security Implementation Guide (HL7 FAST UDAP IG)</a> — Unified Data Access Profiles for B2B Health App Authorization, published through HL7 as the recognized SDO; defines the X.509-anchored software statement used by payers, providers, and networks.</li>
+        <li><a href="https://www.healthit.gov/curesrule">ONC 21st Century Cures Act Final Rule</a>.</li>
+        <li><a href="https://www.healthit.gov/isa/united-states-core-data-interoperability-uscdi">USCDI v3</a>.</li>
+        <li><a href="https://hl7.org/fhir/us/core">HL7 FHIR US Core</a>.</li>
+        <li><a href="https://www.cms.gov/newsroom/fact-sheets/cms-advancing-interoperability-and-improving-prior-authorization-processes-final-rule-cms-0057-f">CMS-0057-F — Advancing Interoperability and Improving Prior Authorization Final Rule</a>.</li>
+        <li><a href="https://www.healthit.gov/topic/information-blocking">ONC Information Blocking</a>.</li>
+        <li><a href="https://www.ecfr.gov/current/title-45/part-171/section-171.302">45 CFR 171.302 — Fees Exception</a>.</li>
+      </ul>
+    </section>
+
+    <div class="footer">
+      <p>CMS-Aligned Network Specification · Editor's Draft · June 22, 2026 · <code>can-spec/0.4-draft</code></p>
+    </div>
+  </main>
+</div>
+
+<script>
+  // Highlight active TOC link on scroll
+  (function () {
+    var tocLinks = Array.prototype.slice.call(document.querySelectorAll('aside ol li a'));
+    var sections = tocLinks
+      .map(function (a) {
+        var href = a.getAttribute('href');
+        if (!href || href[0] !== '#') return null;
+        var el = document.getElementById(href.slice(1));
+        return el ? { link: a, el: el } : null;
+      })
+      .filter(Boolean);
+
+    function update() {
+      var pos = window.scrollY + 120;
+      var current = sections[0];
+      for (var i = 0; i < sections.length; i++) {
+        if (sections[i].el.offsetTop <= pos) current = sections[i];
+      }
+      tocLinks.forEach(function (a) { a.classList.remove('active'); });
+      if (current) current.link.classList.add('active');
+    }
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+  })();
+</script>
+</body>
+</html>

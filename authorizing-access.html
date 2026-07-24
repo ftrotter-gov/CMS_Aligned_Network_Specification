@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How Patient Apps Use a CMS-Aligned Network for Record Location and Data Access</title>
+<style>
+  :root {
+    --fg: #1a1a1a; --fg-muted: #555; --bg: #ffffff; --bg-code: #f4f4f5;
+    --accent: #0f5132; --accent-soft: #e7f1ec; --rule: #e5e5e5; --note-bg: #f5f5f4;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+  main { max-width: 1128px; margin: 0 auto; padding: 32px 24px 96px; }
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-soft); }
+  a:hover { border-bottom-color: var(--accent); }
+  code, pre { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; font-size: 0.92em; }
+  code { background: var(--bg-code); padding: 0.1em 0.35em; border-radius: 3px; }
+  pre { background: var(--bg-code); padding: 14px 16px; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  h1 { font-size: 1.9em; line-height: 1.25; margin-top: 0.5em; }
+  h2 { font-size: 1.4em; margin-top: 2em; border-bottom: 1px solid var(--rule); padding-bottom: 0.3em; }
+  h3 { font-size: 1.15em; margin-top: 1.6em; }
+  blockquote { margin: 1em 0; padding: 0.6em 1em; background: var(--note-bg); border-left: 4px solid var(--accent); color: var(--fg-muted); }
+  blockquote p { margin: 0.3em 0; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 0.95em; }
+  th, td { border: 1px solid var(--rule); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--accent-soft); }
+  hr { border: none; border-top: 1px solid var(--rule); margin: 2.5em 0; }
+  .mermaid { background: #fff; border: 1px solid var(--rule); border-radius: 6px; padding: 12px; margin: 1.2em 0; text-align: center; }
+  #content img { max-width: 100%; display: block; margin: 1.2em auto; }
+
+  .site-nav { font-size: 0.95em; background: var(--accent-soft); border: 1px solid var(--rule); border-radius: 6px; padding: 10px 16px; margin-bottom: 28px; }
+  .site-nav a { font-weight: 600; }
+  .cp { display: inline-block; padding: 1px 9px; border-radius: 10px; font-size: 11px;
+    font-weight: 600; white-space: nowrap; }
+  .dm { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 0.93em; }
+  .dm th, .dm td { border: 1px solid var(--rule); padding: 8px 10px; text-align: left; vertical-align: top; background: none; }
+  .dm thead th { border-bottom: 2px solid var(--rule-strong, #d4d4d4); }
+  .dm .hb { color: #0072b2; } .dm .ho { color: #b97800; }
+  .dm tbody th { font-weight: 600; width: 24%; }
+  .band-b, .band-o { padding: 6px 22px 14px; margin: 1.4em -22px; border-radius: 10px; }
+  .paths-row > .band-b, .paths-row > .band-o { margin: 0.5em 0; }
+  .band-b { background: #f3f8fc; border: 1px solid #cfe3f3; }
+  .band-o { background: #fdf9f0; border: 1px solid #f0e0c2; }
+  .band-b .mermaid { background: #f3f8fc; border-color: #cfe3f3; }
+  .band-o .mermaid { background: #fdf9f0; border-color: #f0e0c2; }
+  @media (min-width: 1700px) {
+    .paths-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 24px;
+      width: min(1660px, 96vw); margin-left: calc(50% - min(830px, 48vw)); }
+    .paths-row > .band-b, .paths-row > .band-o { margin: 0; }
+    .paths-row .mermaid { width: auto; max-width: 100%; margin-left: 0; }
+  }
+  .dm .g { background: #ddf0e0; border-left: 4px solid #15803d; }
+  .dm .y { background: #fdeec9; border-left: 4px solid #b45309; }
+  .dm .r { background: #f6d2d2; border-left: 4px solid #b91c1c; }
+  .dm .g::before { content: "\2713\00a0 "; font-weight: 700; color: #14532d; }
+  .dm .y::before { content: "\00b1\00a0 "; font-weight: 700; color: #7a4a06; }
+  .dm .r::before { content: "\2717\00a0 "; font-weight: 700; color: #7f1d1d; }
+  .cp-b { background: #e1eef9; border: 1px solid #0072b2; color: #0b4a75; }
+  .cp-o { background: #faf0d8; border: 1px solid #b97800; color: #7a5200; }
+</style>
+</head>
+<body>
+<main>
+  <nav class="site-nav" aria-label="Site navigation">
+    <a href="index.html">CAN Spec</a> ·
+    <a href="apps-without-home-networks.html">Apps Without Home Networks</a> ·
+    <a href="authorizing-access.html">Record Location &amp; Data Access</a> ·
+    <a href="example-artifacts/index.html">Artifacts</a>
+  </nav>
+  <div id="content"><p>Loading…</p></div>
+</main>
+<!-- These wrappers render Markdown committed to this same repository: there is no
+     untrusted input path, and the decision matrix relies on raw HTML inside the
+     Markdown. Sanitizing our own content (e.g. DOMPurify) would add a dependency
+     without a threat model, so instead the CDN scripts are pinned to exact
+     versions with Subresource Integrity. -->
+<script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.15.0/dist/mermaid.min.js" integrity="sha384-yQ4mmBBT+vhTAwjFH0toJXNYJ6O4usWnt6EPIdWwrRvx2V/n5lXuDZQwQFeSFydF" crossorigin="anonymous"></script>
+<script>
+const SOURCE = 'authorizing-access.md';
+const renderer = {
+  code(code, lang) {
+    if (lang === 'mermaid') {
+      const esc = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return '<pre class="mermaid">' + esc + '</pre>';
+    }
+    return false;
+  },
+  link(href, title, text) {
+    if (!/^https?:/.test(href)) {
+      if (href.startsWith('can-spec.md')) href = href.replace('can-spec.md', 'index.html');
+      else href = href.replace(/\.md(#|$)/, '.html$1');
+    }
+    return '<a href="' + href + '"' + (title ? ' title="' + title + '"' : '') + '>' + text + '</a>';
+  }
+};
+marked.use({ renderer, mangle: false, headerIds: true });
+mermaid.initialize({ startOnLoad: false, theme: 'neutral', themeVariables: { noteBkgColor: '#e1eef9', noteBorderColor: '#0072b2', noteTextColor: '#0b4a75' } });
+fetch(SOURCE).then(r => {
+  if (!r.ok) throw new Error(r.status);
+  return r.text();
+}).then(async md => {
+  document.getElementById('content').innerHTML = marked.parse(md);
+  let i = 0;
+  for (const el of document.querySelectorAll('.mermaid')) {
+    const { svg } = await mermaid.render('mmd-' + (i++), el.textContent);
+    el.innerHTML = svg;
+  }
+  function collect(startsWith, stopsAt) {
+    const h2s = [...document.querySelectorAll('#content h2')];
+    const start = h2s.find(h => h.textContent.startsWith(startsWith));
+    if (!start) return [];
+    const nodes = [];
+    let node = start;
+    while (node && !(node.tagName === 'H2' && node !== start && node.textContent.startsWith(stopsAt))) {
+      nodes.push(node);
+      node = node.nextElementSibling;
+    }
+    return nodes;
+  }
+  function chunksBy(nodes, tag) {
+    const chunks = [];
+    let cur = [];
+    for (const n of nodes) {
+      if (n.tagName === tag && cur.length) { chunks.push(cur); cur = []; }
+      cur.push(n);
+    }
+    if (cur.length) chunks.push(cur);
+    return chunks;
+  }
+  const blue = chunksBy(collect('Permission-ticket flow', 'Client-assertion flow'), 'H3');
+  const orange = chunksBy(collect('Client-assertion flow', 'Comparing the paths'), 'H3');
+  if (blue.length && orange.length) {
+    const row = document.createElement('div');
+    row.className = 'paths-row';
+    blue[0][0].parentNode.insertBefore(row, blue[0][0]);
+    const place = (chunks, cls, col) => chunks.forEach((chunk, i) => {
+      const cell = document.createElement('div');
+      cell.className = cls;
+      cell.style.gridColumn = col;
+      cell.style.gridRow = i + 1;
+      chunk.forEach(n => cell.appendChild(n));
+      row.appendChild(cell);
+    });
+    place(blue, 'band-b', 1);
+    place(orange, 'band-o', 2);
+  }
+}).catch(e => {
+  document.getElementById('content').innerHTML =
+    '<p>Could not load <code>' + SOURCE + '</code> (' + e.message + '). <a href="' + SOURCE + '">View raw</a>.</p>';
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apps Don't Need a Home Network</title>
+<style>
+  :root {
+    --fg: #1a1a1a; --fg-muted: #555; --bg: #ffffff; --bg-code: #f4f4f5;
+    --accent: #0f5132; --accent-soft: #e7f1ec; --rule: #e5e5e5; --note-bg: #f5f5f4;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+  main { max-width: 1128px; margin: 0 auto; padding: 32px 24px 96px; }
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-soft); }
+  a:hover { border-bottom-color: var(--accent); }
+  code, pre { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; font-size: 0.92em; }
+  code { background: var(--bg-code); padding: 0.1em 0.35em; border-radius: 3px; }
+  pre { background: var(--bg-code); padding: 14px 16px; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  h1 { font-size: 1.9em; line-height: 1.25; margin-top: 0.5em; }
+  h2 { font-size: 1.4em; margin-top: 2em; border-bottom: 1px solid var(--rule); padding-bottom: 0.3em; }
+  h3 { font-size: 1.15em; margin-top: 1.6em; }
+  blockquote { margin: 1em 0; padding: 0.6em 1em; background: var(--note-bg); border-left: 4px solid var(--accent); color: var(--fg-muted); }
+  blockquote p { margin: 0.3em 0; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 0.95em; }
+  th, td { border: 1px solid var(--rule); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--accent-soft); }
+  hr { border: none; border-top: 1px solid var(--rule); margin: 2.5em 0; }
+  .mermaid { background: #fff; border: 1px solid var(--rule); border-radius: 6px; padding: 12px; margin: 1.2em 0; text-align: center; }
+  #content img { max-width: 100%; display: block; margin: 1.2em auto; }
+
+  .site-nav { font-size: 0.95em; background: var(--accent-soft); border: 1px solid var(--rule); border-radius: 6px; padding: 10px 16px; margin-bottom: 28px; }
+  .site-nav a { font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+  <nav class="site-nav" aria-label="Site navigation">
+    <a href="index.html">CAN Spec</a> ·
+    <a href="apps-without-home-networks.html">Apps Without Home Networks</a> ·
+    <a href="authorizing-access.html">Record Location &amp; Data Access</a> ·
+    <a href="example-artifacts/index.html">Artifacts</a>
+  </nav>
+  <div id="content"><p>Loading…</p></div>
+</main>
+<!-- These wrappers render Markdown committed to this same repository: there is no
+     untrusted input path, and the decision matrix relies on raw HTML inside the
+     Markdown. Sanitizing our own content (e.g. DOMPurify) would add a dependency
+     without a threat model, so instead the CDN scripts are pinned to exact
+     versions with Subresource Integrity. -->
+<script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.15.0/dist/mermaid.min.js" integrity="sha384-yQ4mmBBT+vhTAwjFH0toJXNYJ6O4usWnt6EPIdWwrRvx2V/n5lXuDZQwQFeSFydF" crossorigin="anonymous"></script>
+<script>
+const SOURCE = 'apps-without-home-networks.md';
+const renderer = {
+  code(code, lang) {
+    if (lang === 'mermaid') {
+      const esc = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return '<pre class="mermaid">' + esc + '</pre>';
+    }
+    return false;
+  },
+  link(href, title, text) {
+    if (!/^https?:/.test(href)) {
+      if (href.startsWith('can-spec.md')) href = href.replace('can-spec.md', 'index.html');
+      else href = href.replace(/\.md(#|$)/, '.html$1');
+    }
+    return '<a href="' + href + '"' + (title ? ' title="' + title + '"' : '') + '>' + text + '</a>';
+  }
+};
+marked.use({ renderer, mangle: false, headerIds: true });
+mermaid.initialize({ startOnLoad: false, theme: 'neutral' });
+fetch(SOURCE).then(r => {
+  if (!r.ok) throw new Error(r.status);
+  return r.text();
+}).then(async md => {
+  document.getElementById('content').innerHTML = marked.parse(md);
+  let i = 0;
+  for (const el of document.querySelectorAll('.mermaid')) {
+    const { svg } = await mermaid.render('mmd-' + (i++), el.textContent);
+    el.innerHTML = svg;
+  }
+}).catch(e => {
+  document.getElementById('content').innerHTML =
+    '<p>Could not load <code>' + SOURCE + '</code> (' + e.message + '). <a href="' + SOURCE + '">View raw</a>.</p>';
+});
+</script>
+</body>
+</html>
