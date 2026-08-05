@@ -261,7 +261,6 @@
 <div style="max-width:1180px;margin:0 auto;padding:16px 32px 0;">
   <nav aria-label="Site navigation" style="font-size:.95em;background:#e7f1ec;border:1px solid #e5e5e5;border-radius:6px;padding:10px 16px;">
     <a href="index.html">CAN Spec</a> &#183;
-    <a href="apps-without-home-networks.html">Apps Without Home Networks</a> &#183;
     <a href="authorizing-access.html">Record Location &amp; Data Access</a> &#183;
     <a href="example-artifacts/index.html">Artifacts</a>
   </nav>
@@ -286,7 +285,7 @@
       <li><a href="#pathways"><span class="section-anchor">5</span>Connectivity Pathways</a>
         <ol>
           <li><a href="#path-1">5.1 Intranetwork</a></li>
-          <li><a href="#path-2">5.2 RLS Network Search ($match)</a></li>
+          <li><a href="#path-2">5.2 RLS Network Search ($IDI-match)</a></li>
           <li><a href="#path-3">5.3 Targeted via NPD</a></li>
           <li><a href="#path-4">5.4 Bilateral Peering (OPTIONAL)</a></li>
         </ol>
@@ -394,20 +393,8 @@
         <p>Aligning to 45 CFR 171.102 would ground the spec's network definition in existing regulatory text and may affect which entities are in scope as Networks.</p>
       </div>
       <p><strong>Home Network.</strong> The single Network through which a given participant (app, data
-      holder, delegated tech solution) is onboarded and held to be in good standing.</p>
-      <div class="callout warn">
-        <span class="label">Contested — Architecture Decision</span>
-        <strong>The "home network" model is not yet agreed.</strong>
-        The current spec assumes a home-network gating architecture: every app or tech solution connects to the ecosystem via a designated home Network that vouches for it and performs cross-network operations on its behalf. This assumption is contested.
-        <br><br>
-        <strong>Camp A (current spec model):</strong> Apps connect via a home Network. The home Network onboards the app, establishes its good standing, and acts as the trust anchor and routing intermediary for cross-network queries. Other Networks respond because the home Network vouches for the app — not because they have a direct relationship with it.
-        <br><br>
-        <strong>Camp B (direct-connect model):</strong> The architecture should allow apps to connect on their own steam directly to all Networks. Apps may choose to outsource cross-network operations to a Network operator as a convenience, but the architecture should not require home-network gating as a structural constraint. Trust should be derivable from federal credentials alone, without a home Network intermediary in the path.
-      </div>
-      <div class="callout">
-        <span class="label">TODO — Working Group</span>
-        Resolve the home-network architecture question before this spec progresses. Specifically: Is a designated home Network a structural requirement of the ecosystem, or an optional operational convenience? The answer affects §§ 4.3, 7.1, 7.2, and the Connectivity Pathways (§ 5) throughout.
-      </div>
+      holder, delegated tech solution) is onboarded and held to be in good standing. A designated
+      home Network is a structural requirement of the ecosystem.</p>
       <p><strong>Data Holder.</strong> A HIPAA covered entity (provider organization or payer) that
       holds patient records and exposes them via a network.</p>
       <p><strong>Connector.</strong> A tech solution or intermediary that initiates a targeted query
@@ -520,8 +507,10 @@
         <li>The Network <span class="kw must">MUST</span> respond to authorized queries for any data holder on the network across applicable use cases.</li>
       </ul>
 
-      <h3 id="path-2">5.2 Pathway 2 — RLS Network Search ($match)</h3>
-      <p>Discovery uses <code>$match</code> against the published RLS endpoints of other
+      <h3 id="path-2">5.2 Pathway 2 — RLS Network Search ($IDI-match)</h3>
+      <p>Discovery uses <code>$IDI-match</code>, the identity-matching operation defined in the
+      <a href="https://build.fhir.org/ig/HL7/fhir-identity-matching-ig/OperationDefinition-IDI-match.html">FHIR Identity Matching Implementation Guide</a>,
+      against the published RLS endpoints of other
       CMS-Aligned Networks. Data retrieval may use either <strong>federated FHIR</strong> (each
       responder serves its own data directly) or <strong>brokered FHIR</strong> (a network broker
       aggregates and returns data on behalf of multiple endpoints). Both retrieval modes are
@@ -529,29 +518,16 @@
       <h4>Assumptions</h4>
       <ul>
         <li>Every Network exposes a standardized RLS endpoint at a known address listed in NPD.</li>
-        <li>The endpoint accepts authenticated <code>$match</code> requests from other CMS-Aligned Networks and Apps in the ecosystem.</li>
+        <li>The endpoint accepts authenticated <code>$IDI-match</code> requests from other CMS-Aligned Networks and Apps in the ecosystem.</li>
         <li>Common patient matching (§ 6) applies.</li>
       </ul>
       <h4>Conformance</h4>
       <ul>
-        <li>A Network <span class="kw must">MUST</span> expose a standardized RLS endpoint at the address published in NPD.</li>
-        <li>A Network <span class="kw must">MUST</span> accept authenticated <code>$match</code> requests from other CMS-Aligned Networks on this endpoint.</li>
+        <li>A Network <span class="kw must">MUST</span> expose an <code>$IDI-match</code> endpoint for patient discovery and record location, at the address published in NPD. The operation conforms to the <a href="https://build.fhir.org/ig/HL7/fhir-identity-matching-ig/OperationDefinition-IDI-match.html">FHIR Identity Matching IG</a>.</li>
+        <li>A Network <span class="kw must">MUST</span> accept authenticated <code>$IDI-match</code> requests from other CMS-Aligned Networks on this endpoint.</li>
         <li>A Network <span class="kw must">MUST</span> apply the CMS patient matching rule (§ 6) to all queries received via Pathway 2.</li>
         <li>Data retrieval <span class="kw may">MAY</span> use federated FHIR or brokered FHIR; both are conformant.</li>
       </ul>
-      <div class="callout">
-        <span class="label">Open Question — For Working Group Discussion</span>
-        <p>The current conformance requirement uses <code>$match</code> as the sole discovery mechanism. Two concerns have been raised:</p>
-        <ol>
-          <li><strong><code>$match</code> has no production use at scale</strong> for cross-network Record Locator Service. It is a FHIR operation designed for single-endpoint patient matching, not multi-site federated discovery.</li>
-          <li><strong>XCPD (Cross-Community Patient Discovery, IHE ITI-55)</strong> has established production use for exactly this purpose and should be considered the floor for cross-network discovery.</li>
-        </ol>
-        <p>Proposed for discussion: Networks <span class="kw should">SHOULD</span> accept either <code>$match</code> <strong>OR</strong> XCPD for cross-network discovery, with conformance testing requirements to be determined. FHIR-based mechanisms (including <code>$match</code>) may be added or substituted as they reach production readiness at scale.</p>
-      </div>
-      <div class="callout warn">
-        <span class="label">Dependency — Legal/Operational — Unresolved</span>
-        The current pathway assumes any CMS-aligned network must provide RLS access to non-participants. Multiple participants have flagged this as a potential HIPAA violation in the absence of a Business Associate Agreement between the data holder and the requesting non-participant. Resolution depends on the legal/operational workstream and is tracked outside this document.
-      </div>
       <div class="callout warn">
         <span class="label">Note</span>
         The exact wire profile of the RLS endpoint, the federation transport, and the
@@ -629,6 +605,7 @@
       <p>When a participant has been onboarded by one home Network using a recognized credential type, every other Network <span class="kw must">MUST</span> register that participant on a defined timeline without redundant onboarding.</p>
       <p>The timeline is set by the CMS Interoperability Framework.</p>
       <p>A Network <span class="kw must-not">MUST NOT</span> impose duplicative trust gating on top of the federally grounded credentials. Operational coordination (abuse contacts, rate-limit, security procedures, support channels) <span class="kw may">MAY</span> be coordinated.</p>
+      <p>Manual registration <span class="kw may">MAY</span> be supported up until the deadline of October 1, 2026, at which time all participants in the HTE <span class="kw must">MUST</span> support auto or dynamic registration.</p>
 
       <h3>7.2 Presumptive Eligibility</h3>
       <p>A participant that has met its trust requirements and is in good standing on one home Network
@@ -1064,7 +1041,7 @@
       where such notifications are permitted by existing law.</p>
       <div class="callout warn">
         <span class="label">Deferred — Not in Scope for July 4, 2026</span>
-        <p>Appointment and Encounter Notifications (§16.3) are not included in the July 4, 2026 GA requirements. The Notifications working group has not met in several months due to unresolved questions on network design and structure. This criterion will be revisited once the home-network architecture question (see §2, Terminology — Home Network contested decision) reaches consensus. Networks are not required to implement §16.3 for initial CMS-Aligned recognition.</p>
+        <p>Appointment and Encounter Notifications (§16.3) are not included in the July 4, 2026 GA requirements. The Notifications working group has not met in several months due to unresolved questions on network design and structure. This criterion will be revisited once those questions are resolved. Networks are not required to implement §16.3 for initial CMS-Aligned recognition.</p>
       </div>
 
       <h3>16.4 Record Locator Service</h3>
@@ -1099,7 +1076,7 @@
         <tbody>
           <tr>
             <td>A1</td>
-            <td>Wire profile of the standardized RLS / federation endpoint (transport, authentication, payload schema for <code>$match</code> requests and responses).</td>
+            <td>Wire profile of the standardized RLS / federation endpoint (transport, authentication, payload schema for <code>$IDI-match</code> requests and responses).</td>
             <td>Framework defers; Connectivity Pathways doc notes this is the baseline interface but the operational profile is not fixed.</td>
           </tr>
           <tr>

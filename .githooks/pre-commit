@@ -1,0 +1,22 @@
+#!/bin/sh
+# Pre-commit hook: block commits that let can-spec.md and index.html drift.
+#
+# The spec is maintained as two hand-edited files with no generator, so a
+# heading added/renamed/reordered in one but not the other is easy to miss.
+# tools/check_spec_sync.py compares their structure and exits non-zero on
+# drift. RFC 2119 keyword differences are advisory only and never block.
+#
+# Runs only when either file is staged. Checks the working tree (what you are
+# about to have on disk), so stage both files before committing.
+
+if git diff --cached --name-only | grep -Eq '^(can-spec\.md|index\.html)$'; then
+  echo "→ can-spec.md / index.html changed — checking structural sync…"
+  if ! python3 tools/check_spec_sync.py; then
+    echo
+    echo "✗ commit blocked: can-spec.md and index.html are out of sync."
+    echo "  Fix the drift above (edit whichever file lagged), then re-commit."
+    echo "  To bypass in an emergency: git commit --no-verify"
+    exit 1
+  fi
+fi
+exit 0

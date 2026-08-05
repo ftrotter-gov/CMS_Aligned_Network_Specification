@@ -59,19 +59,7 @@ A network conforms to this specification when it satisfies every **MUST** in §�
 >
 > Aligning to 45 CFR 171.102 would ground the spec's network definition in existing regulatory text and may affect which entities are in scope as Networks.
 
-**Home Network** — The single Network through which a given participant (app, data holder, delegated tech solution) is onboarded and held to be in good standing.
-
-> **⚠ CONTESTED — Architecture Decision**
->
-> **The "home network" model is not yet agreed.** The current spec assumes a home-network gating architecture: every app or tech solution connects to the ecosystem via a designated home Network that vouches for it and performs cross-network operations on its behalf. This assumption is contested.
->
-> **Camp A (current spec model):** Apps connect via a home Network. The home Network onboards the app, establishes its good standing, and acts as the trust anchor and routing intermediary for cross-network queries. Other Networks respond because the home Network vouches for the app — not because they have a direct relationship with it.
->
-> **Camp B (direct-connect model):** The architecture should allow apps to connect on their own steam directly to all Networks. Apps may choose to outsource cross-network operations to a Network operator as a convenience, but the architecture should not require home-network gating as a structural constraint. Trust should be derivable from federal credentials alone, without a home Network intermediary in the path.
->
-> **TODO — Working Group**
->
-> Resolve the home-network architecture question before this spec progresses. Specifically: Is a designated home Network a structural requirement of the ecosystem, or an optional operational convenience? The answer affects §§ 4.3, 7.1, 7.2, and the Connectivity Pathways (§ 5) throughout.
+**Home Network** — The single Network through which a given participant (app, data holder, delegated tech solution) is onboarded and held to be in good standing. A designated home Network is a structural requirement of the ecosystem.
 
 **Data Holder** — A HIPAA covered entity (provider organization or payer) that holds patient records and exposes them via a network.
 
@@ -170,33 +158,20 @@ The Network serves queries against data holders that have contracted directly wi
 **Conformance:**
 - The Network **MUST** respond to authorized queries for any data holder on the network across applicable use cases.
 
-### 5.2 Pathway 2 — RLS Network Search ($match)
+### 5.2 Pathway 2 — RLS Network Search ($IDI-match)
 
-Discovery uses `$match` against the published RLS endpoints of other CMS-Aligned Networks. Data retrieval may use either **federated FHIR** (each responder serves its own data directly) or **brokered FHIR** (a network broker aggregates and returns data on behalf of multiple endpoints). Both retrieval modes are conformant.
+Discovery uses `$IDI-match`, the identity-matching operation defined in the [FHIR Identity Matching Implementation Guide](https://build.fhir.org/ig/HL7/fhir-identity-matching-ig/OperationDefinition-IDI-match.html), against the published RLS endpoints of other CMS-Aligned Networks. Data retrieval may use either **federated FHIR** (each responder serves its own data directly) or **brokered FHIR** (a network broker aggregates and returns data on behalf of multiple endpoints). Both retrieval modes are conformant.
 
 **Assumptions:**
 - Every Network exposes a standardized RLS endpoint at a known address listed in NPD.
-- The endpoint accepts authenticated `$match` requests from other CMS-Aligned Networks and Apps in the ecosystem.
+- The endpoint accepts authenticated `$IDI-match` requests from other CMS-Aligned Networks and Apps in the ecosystem.
 - Common patient matching (§ 6) applies.
 
 **Conformance:**
-- A Network **MUST** expose a standardized RLS endpoint at the address published in NPD.
-- A Network **MUST** accept authenticated `$match` requests from other CMS-Aligned Networks on this endpoint.
+- A Network **MUST** expose an `$IDI-match` endpoint for patient discovery and record location, at the address published in NPD. The operation conforms to the [FHIR Identity Matching IG](https://build.fhir.org/ig/HL7/fhir-identity-matching-ig/OperationDefinition-IDI-match.html).
+- A Network **MUST** accept authenticated `$IDI-match` requests from other CMS-Aligned Networks on this endpoint.
 - A Network **MUST** apply the CMS patient matching rule (§ 6) to all queries received via Pathway 2.
 - Data retrieval **MAY** use federated FHIR or brokered FHIR; both are conformant.
-
-> **OPEN QUESTION — For Working Group Discussion**
->
-> The current conformance requirement uses `$match` as the sole discovery mechanism. Two concerns have been raised:
->
-> 1. **`$match` has no production use at scale** for cross-network Record Locator Service. It is a FHIR operation designed for single-endpoint patient matching, not multi-site federated discovery.
-> 2. **XCPD (Cross-Community Patient Discovery, IHE ITI-55)** has established production use for exactly this purpose and should be considered the floor for cross-network discovery.
->
-> Proposed for discussion: Networks **SHOULD** accept either `$match` **OR** XCPD for cross-network discovery, with conformance testing requirements to be determined. FHIR-based mechanisms (including `$match`) may be added or substituted as they reach production readiness at scale.
-
-> **DEPENDENCY — LEGAL/OPERATIONAL — UNRESOLVED**
->
-> The current pathway assumes any CMS-aligned network must provide RLS access to non-participants. Multiple participants have flagged this as a potential HIPAA violation in the absence of a Business Associate Agreement between the data holder and the requesting non-participant. Resolution depends on the legal/operational workstream and is tracked outside this document.
 
 > **Note.** The exact wire profile of the RLS endpoint, the federation transport, and the authentication scheme between Networks are intentionally left to the CMS Interoperability Framework and the working-group operational profiles. The wire profile for brokered FHIR retrieval is an open question — see Appendix A.
 
@@ -682,7 +657,7 @@ A Network **MUST** provide appointment and encounter notifications for outpatien
 
 > **Deferred — Not in Scope for July 4, 2026**
 >
-> Appointment and Encounter Notifications (§16.3) are not included in the July 4, 2026 GA requirements. The Notifications working group has not met in several months due to unresolved questions on network design and structure. This criterion will be revisited once the home-network architecture question (see §2, Terminology — Home Network contested decision) reaches consensus. Networks are not required to implement §16.3 for initial CMS-Aligned recognition.
+> Appointment and Encounter Notifications (§16.3) are not included in the July 4, 2026 GA requirements. The Notifications working group has not met in several months due to unresolved questions on network design and structure. This criterion will be revisited once those questions are resolved. Networks are not required to implement §16.3 for initial CMS-Aligned recognition.
 
 ### 16.4 Record Locator Service
 
@@ -705,7 +680,7 @@ These are gaps identified in source materials that this draft does not resolve. 
 
 | # | Open Question | Source |
 |---|---|---|
-| A1 | Wire profile of the standardized RLS / federation endpoint (transport, authentication, payload schema for `$match` requests and responses). | Framework defers; Connectivity Pathways doc notes this is the baseline interface but the operational profile is not fixed. |
+| A1 | Wire profile of the standardized RLS / federation endpoint (transport, authentication, payload schema for `$IDI-match` requests and responses). | Framework defers; Connectivity Pathways doc notes this is the baseline interface but the operational profile is not fixed. |
 | A1b | Wire profile for brokered FHIR retrieval under Pathway 2 — how a network broker aggregates responses from multiple RLS endpoints and returns them to the requesting Network (payload shape, error handling, partial-response semantics). | Introduced by the shift from federated-only to dual retrieval modes in Pathway 2; not yet specified. |
 | A2 | Mechanism for preventing endpoint-spamming under Pathway 3 (geo-search constraints, rate limits, query-shape rules). | Connectivity Pathways doc explicitly raises this as an unresolved question. |
 | A3 | Whether networks may charge data holders per query for required HTE use cases, and the same for payer-to-provider queries. | Workgroup Alternative Proposal § 2.3 — raised but not resolved by CMS in source materials. |
