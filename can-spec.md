@@ -1,11 +1,11 @@
 # CMS-Aligned Network Specification
 
-**Draft Community Specification**
+**Community Specification**
 
-**Editor's Draft, June 22, 2026**
+**June 22, 2026**
 
-**This version:** `can-spec/0.4-draft`  
-**Latest published version:** *none yet*  
+**This version:** `can-spec/0.5`  
+**Latest published version:** August 5, 2026  
 **Editor:** Liz Lewis (b.well Connected Health)  
 **Feedback:** via CMS Health Technology Ecosystem working groups
 
