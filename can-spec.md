@@ -59,19 +59,7 @@ A network conforms to this specification when it satisfies every **MUST** in §�
 >
 > Aligning to 45 CFR 171.102 would ground the spec's network definition in existing regulatory text and may affect which entities are in scope as Networks.
 
-**Home Network** — The single Network through which a given participant (app, data holder, delegated tech solution) is onboarded and held to be in good standing.
-
-> **⚠ CONTESTED — Architecture Decision**
->
-> **The "home network" model is not yet agreed.** The current spec assumes a home-network gating architecture: every app or tech solution connects to the ecosystem via a designated home Network that vouches for it and performs cross-network operations on its behalf. This assumption is contested.
->
-> **Camp A (current spec model):** Apps connect via a home Network. The home Network onboards the app, establishes its good standing, and acts as the trust anchor and routing intermediary for cross-network queries. Other Networks respond because the home Network vouches for the app — not because they have a direct relationship with it.
->
-> **Camp B (direct-connect model):** The architecture should allow apps to connect on their own steam directly to all Networks. Apps may choose to outsource cross-network operations to a Network operator as a convenience, but the architecture should not require home-network gating as a structural constraint. Trust should be derivable from federal credentials alone, without a home Network intermediary in the path.
->
-> **TODO — Working Group**
->
-> Resolve the home-network architecture question before this spec progresses. Specifically: Is a designated home Network a structural requirement of the ecosystem, or an optional operational convenience? The answer affects §§ 4.3, 7.1, 7.2, and the Connectivity Pathways (§ 5) throughout.
+**Home Network** — The single Network through which a given participant (app, data holder, delegated tech solution) is onboarded and held to be in good standing. A designated home Network is a structural requirement of the ecosystem.
 
 **Data Holder** — A HIPAA covered entity (provider organization or payer) that holds patient records and exposes them via a network.
 
@@ -682,7 +670,7 @@ A Network **MUST** provide appointment and encounter notifications for outpatien
 
 > **Deferred — Not in Scope for July 4, 2026**
 >
-> Appointment and Encounter Notifications (§16.3) are not included in the July 4, 2026 GA requirements. The Notifications working group has not met in several months due to unresolved questions on network design and structure. This criterion will be revisited once the home-network architecture question (see §2, Terminology — Home Network contested decision) reaches consensus. Networks are not required to implement §16.3 for initial CMS-Aligned recognition.
+> Appointment and Encounter Notifications (§16.3) are not included in the July 4, 2026 GA requirements. The Notifications working group has not met in several months due to unresolved questions on network design and structure. This criterion will be revisited once those questions are resolved. Networks are not required to implement §16.3 for initial CMS-Aligned recognition.
 
 ### 16.4 Record Locator Service
 
