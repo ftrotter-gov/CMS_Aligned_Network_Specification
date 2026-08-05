@@ -528,19 +528,6 @@
         <li>A Network <span class="kw must">MUST</span> apply the CMS patient matching rule (§ 6) to all queries received via Pathway 2.</li>
         <li>Data retrieval <span class="kw may">MAY</span> use federated FHIR or brokered FHIR; both are conformant.</li>
       </ul>
-      <div class="callout">
-        <span class="label">Open Question — For Working Group Discussion</span>
-        <p>The current conformance requirement uses <code>$IDI-match</code> as the sole discovery mechanism. Two concerns have been raised:</p>
-        <ol>
-          <li><strong><code>$IDI-match</code> has no production use at scale</strong> for cross-network Record Locator Service. It is a FHIR operation designed for single-endpoint patient matching, not multi-site federated discovery.</li>
-          <li><strong>XCPD (Cross-Community Patient Discovery, IHE ITI-55)</strong> has established production use for exactly this purpose and should be considered the floor for cross-network discovery.</li>
-        </ol>
-        <p>Proposed for discussion: Networks <span class="kw should">SHOULD</span> accept either <code>$IDI-match</code> <strong>OR</strong> XCPD for cross-network discovery, with conformance testing requirements to be determined. FHIR-based mechanisms (including <code>$IDI-match</code>) may be added or substituted as they reach production readiness at scale.</p>
-      </div>
-      <div class="callout warn">
-        <span class="label">Dependency — Legal/Operational — Unresolved</span>
-        The current pathway assumes any CMS-aligned network must provide RLS access to non-participants. Multiple participants have flagged this as a potential HIPAA violation in the absence of a Business Associate Agreement between the data holder and the requesting non-participant. Resolution depends on the legal/operational workstream and is tracked outside this document.
-      </div>
       <div class="callout warn">
         <span class="label">Note</span>
         The exact wire profile of the RLS endpoint, the federation transport, and the

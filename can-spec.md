@@ -173,19 +173,6 @@ Discovery uses `$IDI-match`, the identity-matching operation defined in the [FHI
 - A Network **MUST** apply the CMS patient matching rule (§ 6) to all queries received via Pathway 2.
 - Data retrieval **MAY** use federated FHIR or brokered FHIR; both are conformant.
 
-> **OPEN QUESTION — For Working Group Discussion**
->
-> The current conformance requirement uses `$IDI-match` as the sole discovery mechanism. Two concerns have been raised:
->
-> 1. **`$IDI-match` has no production use at scale** for cross-network Record Locator Service. It is a FHIR operation designed for single-endpoint patient matching, not multi-site federated discovery.
-> 2. **XCPD (Cross-Community Patient Discovery, IHE ITI-55)** has established production use for exactly this purpose and should be considered the floor for cross-network discovery.
->
-> Proposed for discussion: Networks **SHOULD** accept either `$IDI-match` **OR** XCPD for cross-network discovery, with conformance testing requirements to be determined. FHIR-based mechanisms (including `$IDI-match`) may be added or substituted as they reach production readiness at scale.
-
-> **DEPENDENCY — LEGAL/OPERATIONAL — UNRESOLVED**
->
-> The current pathway assumes any CMS-aligned network must provide RLS access to non-participants. Multiple participants have flagged this as a potential HIPAA violation in the absence of a Business Associate Agreement between the data holder and the requesting non-participant. Resolution depends on the legal/operational workstream and is tracked outside this document.
-
 > **Note.** The exact wire profile of the RLS endpoint, the federation transport, and the authentication scheme between Networks are intentionally left to the CMS Interoperability Framework and the working-group operational profiles. The wire profile for brokered FHIR retrieval is an open question — see Appendix A.
 
 ### 5.3 Pathway 3 — Targeted Queries Against NPD
