@@ -170,6 +170,9 @@ Discovery uses `$IDI-match`, the identity-matching operation defined in the [FHI
 **Conformance:**
 - A Network **MUST** expose an `$IDI-match` endpoint for patient discovery and record location, at the address published in NPD. The operation conforms to the [FHIR Identity Matching IG](https://build.fhir.org/ig/HL7/fhir-identity-matching-ig/OperationDefinition-IDI-match.html).
 - A Network **MUST** accept authenticated `$IDI-match` requests from other CMS-Aligned Networks on this endpoint.
+- A Network **MUST** respond to authorized patient access queries (HIPAA right of access) received via this pathway, regardless of whether a contractual agreement exists between the Network and the requesting party. Patient discovery and patient access **MUST NOT** be conditioned on a bilateral agreement.
+- A Network **MAY**, however, require a contractual agreement (e.g., participation or peering terms) as a precondition for responding to B2B (provider or payer system-to-system) queries.
+- A Network **MUST** publish this `$IDI-match` endpoint into the National Provider Directory (NPD) by October 1, 2026, and by that date **MUST** be capable of responding to patient access queries from any App listed in the CMS Medicare App Library.
 - A Network **MUST** apply the CMS patient matching rule (§ 6) to all queries received via Pathway 2.
 - Data retrieval **MAY** use federated FHIR or brokered FHIR; both are conformant.
 
