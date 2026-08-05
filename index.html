@@ -285,7 +285,7 @@
       <li><a href="#pathways"><span class="section-anchor">5</span>Connectivity Pathways</a>
         <ol>
           <li><a href="#path-1">5.1 Intranetwork</a></li>
-          <li><a href="#path-2">5.2 RLS Network Search ($match)</a></li>
+          <li><a href="#path-2">5.2 RLS Network Search ($IDI-match)</a></li>
           <li><a href="#path-3">5.3 Targeted via NPD</a></li>
           <li><a href="#path-4">5.4 Bilateral Peering (OPTIONAL)</a></li>
         </ol>
@@ -507,8 +507,10 @@
         <li>The Network <span class="kw must">MUST</span> respond to authorized queries for any data holder on the network across applicable use cases.</li>
       </ul>
 
-      <h3 id="path-2">5.2 Pathway 2 — RLS Network Search ($match)</h3>
-      <p>Discovery uses <code>$match</code> against the published RLS endpoints of other
+      <h3 id="path-2">5.2 Pathway 2 — RLS Network Search ($IDI-match)</h3>
+      <p>Discovery uses <code>$IDI-match</code>, the identity-matching operation defined in the
+      <a href="https://build.fhir.org/ig/HL7/fhir-identity-matching-ig/OperationDefinition-IDI-match.html">FHIR Identity Matching Implementation Guide</a>,
+      against the published RLS endpoints of other
       CMS-Aligned Networks. Data retrieval may use either <strong>federated FHIR</strong> (each
       responder serves its own data directly) or <strong>brokered FHIR</strong> (a network broker
       aggregates and returns data on behalf of multiple endpoints). Both retrieval modes are
@@ -516,24 +518,24 @@
       <h4>Assumptions</h4>
       <ul>
         <li>Every Network exposes a standardized RLS endpoint at a known address listed in NPD.</li>
-        <li>The endpoint accepts authenticated <code>$match</code> requests from other CMS-Aligned Networks and Apps in the ecosystem.</li>
+        <li>The endpoint accepts authenticated <code>$IDI-match</code> requests from other CMS-Aligned Networks and Apps in the ecosystem.</li>
         <li>Common patient matching (§ 6) applies.</li>
       </ul>
       <h4>Conformance</h4>
       <ul>
-        <li>A Network <span class="kw must">MUST</span> expose a standardized RLS endpoint at the address published in NPD.</li>
-        <li>A Network <span class="kw must">MUST</span> accept authenticated <code>$match</code> requests from other CMS-Aligned Networks on this endpoint.</li>
+        <li>A Network <span class="kw must">MUST</span> expose an <code>$IDI-match</code> endpoint for patient discovery and record location, at the address published in NPD. The operation conforms to the <a href="https://build.fhir.org/ig/HL7/fhir-identity-matching-ig/OperationDefinition-IDI-match.html">FHIR Identity Matching IG</a>.</li>
+        <li>A Network <span class="kw must">MUST</span> accept authenticated <code>$IDI-match</code> requests from other CMS-Aligned Networks on this endpoint.</li>
         <li>A Network <span class="kw must">MUST</span> apply the CMS patient matching rule (§ 6) to all queries received via Pathway 2.</li>
         <li>Data retrieval <span class="kw may">MAY</span> use federated FHIR or brokered FHIR; both are conformant.</li>
       </ul>
       <div class="callout">
         <span class="label">Open Question — For Working Group Discussion</span>
-        <p>The current conformance requirement uses <code>$match</code> as the sole discovery mechanism. Two concerns have been raised:</p>
+        <p>The current conformance requirement uses <code>$IDI-match</code> as the sole discovery mechanism. Two concerns have been raised:</p>
         <ol>
-          <li><strong><code>$match</code> has no production use at scale</strong> for cross-network Record Locator Service. It is a FHIR operation designed for single-endpoint patient matching, not multi-site federated discovery.</li>
+          <li><strong><code>$IDI-match</code> has no production use at scale</strong> for cross-network Record Locator Service. It is a FHIR operation designed for single-endpoint patient matching, not multi-site federated discovery.</li>
           <li><strong>XCPD (Cross-Community Patient Discovery, IHE ITI-55)</strong> has established production use for exactly this purpose and should be considered the floor for cross-network discovery.</li>
         </ol>
-        <p>Proposed for discussion: Networks <span class="kw should">SHOULD</span> accept either <code>$match</code> <strong>OR</strong> XCPD for cross-network discovery, with conformance testing requirements to be determined. FHIR-based mechanisms (including <code>$match</code>) may be added or substituted as they reach production readiness at scale.</p>
+        <p>Proposed for discussion: Networks <span class="kw should">SHOULD</span> accept either <code>$IDI-match</code> <strong>OR</strong> XCPD for cross-network discovery, with conformance testing requirements to be determined. FHIR-based mechanisms (including <code>$IDI-match</code>) may be added or substituted as they reach production readiness at scale.</p>
       </div>
       <div class="callout warn">
         <span class="label">Dependency — Legal/Operational — Unresolved</span>
@@ -1087,7 +1089,7 @@
         <tbody>
           <tr>
             <td>A1</td>
-            <td>Wire profile of the standardized RLS / federation endpoint (transport, authentication, payload schema for <code>$match</code> requests and responses).</td>
+            <td>Wire profile of the standardized RLS / federation endpoint (transport, authentication, payload schema for <code>$IDI-match</code> requests and responses).</td>
             <td>Framework defers; Connectivity Pathways doc notes this is the baseline interface but the operational profile is not fixed.</td>
           </tr>
           <tr>
