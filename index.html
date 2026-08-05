@@ -943,10 +943,17 @@
       </ul>
       <p>Audit logs <span class="kw must">MUST</span> be organization-level at minimum. Audit logs <span class="kw must">MUST</span> be kept for a minimum of 7 years, or longer if required by applicable law (45 CFR 164.530(j)).</p>
       <p>A Network <span class="kw must">MUST</span> facilitate patient-facing audit access so patients
-      can see, through their app, who queried their data. Implementations <span class="kw must">MUST</span>
+      can see, through their app, who queried their data and where their data has been shared. The home
+      Network — the intranetwork (§ 5.1) through which a patient-facing app is onboarded — is responsible
+      for surfacing this audit information to the consumer apps it serves: a home Network <span class="kw must">MUST</span>
+      make audit logs available to the patient apps within its home network. Implementations <span class="kw must">MUST</span>
       conform to the IAS Audit Log API Specification (v1.0, February 2026), which defines the FHIR
       AuditEvent resource model, IAL2 OIDC token-based patient authentication, and endpoint discovery
       via RLS and NPD.</p>
+      <div class="callout">
+        <span class="label">Note — Scope</span>
+        <p>Network-to-network audit event sharing is <strong>NOT</strong> in scope at this time. Each home Network is responsible only for surfacing audit information to the patient-facing apps it serves within its home network. A Network is <strong>NOT</strong> required to share audit event data with patient apps that do not belong to its home network.</p>
+      </div>
       <div class="callout">
         <span class="label">Note</span>
         <p>Patient-facing audit coverage is scoped to network-mediated queries — those passing through an RLS endpoint (Pathways 1 and 2). Point-to-point queries under Pathway 3 are excluded from this requirement because the network is not in the query path and cannot produce a log of traffic it never sees. This limitation is explicitly acknowledged in the IAS Audit Log API Spec (§1.2): "Point-to-point transactions that do not flow through an RLS" are out of scope. Endpoint-level audit obligations for Pathway 3 are governed by the data holder's own HIPAA audit requirements, not this section.</p>

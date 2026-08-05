@@ -580,7 +580,11 @@ A Network **MUST** produce audit logs for queries on its network, including:
 
 Audit logs **MUST** be organization-level at minimum. Audit logs **MUST** be kept for a minimum of 7 years, or longer if required by applicable law (45 CFR 164.530(j)).
 
-A Network **MUST** facilitate patient-facing audit access so patients can see, through their app, who queried their data. Implementations **MUST** conform to the IAS Audit Log API Specification (v1.0, February 2026), which defines the FHIR AuditEvent resource model, IAL2 OIDC token-based patient authentication, and endpoint discovery via RLS and NPD.
+A Network **MUST** facilitate patient-facing audit access so patients can see, through their app, who queried their data and where their data has been shared. The home Network — the intranetwork (§ 5.1) through which a patient-facing app is onboarded — is responsible for surfacing this audit information to the consumer apps it serves: a home Network **MUST** make audit logs available to the patient apps within its home network. Implementations **MUST** conform to the IAS Audit Log API Specification (v1.0, February 2026), which defines the FHIR AuditEvent resource model, IAL2 OIDC token-based patient authentication, and endpoint discovery via RLS and NPD.
+
+> **NOTE — SCOPE**
+>
+> Network-to-network audit event sharing is **NOT** in scope at this time. Each home Network is responsible only for surfacing audit information to the patient-facing apps it serves within its home network. A Network is **NOT** required to share audit event data with patient apps that do not belong to its home network.
 
 > **NOTE**
 >
