@@ -1,11 +1,11 @@
 # CMS-Aligned Network Specification
 
-**Draft Community Specification**
+**Community Specification**
 
-**Editor's Draft, June 22, 2026**
+**June 22, 2026**
 
-**This version:** `can-spec/0.4-draft`  
-**Latest published version:** *none yet*  
+**This version:** `can-spec/0.5`  
+**Latest published version:** August 5, 2026  
 **Editor:** Liz Lewis (b.well Connected Health)  
 **Feedback:** via CMS Health Technology Ecosystem working groups
 
@@ -39,7 +39,7 @@ This draft is offered as a consolidated rendering of network-side requirements s
 
 The keywords **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **MAY**, and **OPTIONAL** in this document are to be interpreted as described in BCP 14 ([RFC 2119](https://www.rfc-editor.org/rfc/rfc2119), [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174)) when, and only when, they appear in all capitals.
 
-A network conforms to this specification when it satisfies every **MUST** in §§ 3–14 and is in good standing under § 15.
+A network conforms to this specification when it satisfies every **MUST** in §§ 3–15 and is in good standing under § 16.
 
 ---
 
@@ -71,7 +71,7 @@ A network conforms to this specification when it satisfies every **MUST** in §�
 
 **Good Standing** — As defined in § 4.3: completed home-network onboarding, current on obligations, no active unresolved complaints, passed operational health checks, not suspended.
 
-**Inter-Network Settlement** — A commercial arrangement in which one Network compensates another for carrying or fulfilling queries that originate from the first Network's participants — analogous to transit fees or peering settlements in telecommunications. Settlement is prohibited for patient-directed access traffic (§ 14.3) and is optional for other traffic types.
+**Inter-Network Settlement** — A commercial arrangement in which one Network compensates another for carrying or fulfilling queries that originate from the first Network's participants — analogous to transit fees or peering settlements in telecommunications. Settlement is prohibited for patient-directed access traffic (§ 15.3) and is optional for other traffic types.
 
 **NPD** — National Provider Directory. The authoritative public registry of ecosystem participants, endpoints, and inter-network connections.
 
@@ -112,10 +112,23 @@ Every CMS-Aligned Network **MUST**:
 7. Respond to authorized queries completely and without undue obstruction, subject to applicable access controls and authorization requirements (§ 10).
 8. Publish to NPD (§ 11).
 9. Produce audit logs accessible to patients (§ 12).
-10. Maintain HITRUST security validation (§ 13).
-11. Comply with the fees floor (§ 14).
-12. Remain accountable to CMS for ongoing compliance (§ 15).
+10. Maintain HITRUST security validation (§ 14).
+11. Comply with the fees floor (§ 15).
+12. Remain accountable to CMS for ongoing compliance (§ 16).
 13. Attest to the same "rules of the road" of all other CMS-Aligned Networks (§ 17).
+
+### 3.3 FHIR API Access
+
+A Network **MUST** provide or facilitate access to data using FHIR APIs that adhere to the [HL7 FHIR US Core Implementation Guide](https://hl7.org/fhir/us/core), including:
+
+- a complete and valid FHIR Capability Statement;
+- USCDI v3 (or later) data elements with terminology compliance — laboratories coded in LOINC, medications in RxNorm, conditions in SNOMED CT.
+
+A Network **SHOULD** leverage [FHIR Bulk Data Exchange](https://hl7.org/fhir/uv/bulkdata) to reduce stress on existing systems and enable the exchange of full data records.
+
+### 3.4 Chart Notes and Clinical Documents
+
+A Network **MUST** return chart notes and clinical documents — including radiology reports, scanned or faxed labs, and external specialist notes — in human-readable formats (PDF, TIFF, JPG) as FHIR attachments, as specified in USCDI v3. Ambient listening recordings **SHOULD** be returned where they are persisted and a standard exchange mechanism is available; the exchange profile for ambient recordings is TBD.
 
 ---
 
@@ -160,7 +173,7 @@ The Network serves queries against data holders that have contracted directly wi
 
 ### 5.2 Pathway 2 — RLS Network Search ($IDI-match)
 
-Discovery uses `$IDI-match`, the identity-matching operation defined in the [FHIR Identity Matching Implementation Guide](https://build.fhir.org/ig/HL7/fhir-identity-matching-ig/OperationDefinition-IDI-match.html), against the published RLS endpoints of other CMS-Aligned Networks. Data retrieval may use either **federated FHIR** (each responder serves its own data directly) or **brokered FHIR** (a network broker aggregates and returns data on behalf of multiple endpoints). Both retrieval modes are conformant.
+Discovery uses `$IDI-match`, the identity-matching operation defined in the [FHIR Identity Matching Implementation Guide](https://hl7.org/fhir/us/identity-matching/STU2/OperationDefinition-IDI-match.html), against the published RLS endpoints of other CMS-Aligned Networks. Data retrieval may use either **federated FHIR** (each responder serves its own data directly) or **brokered FHIR** (a network broker aggregates and returns data on behalf of multiple endpoints). Both retrieval modes are conformant.
 
 **Assumptions:**
 - Every Network exposes a standardized RLS endpoint at a known address listed in NPD.
@@ -168,10 +181,22 @@ Discovery uses `$IDI-match`, the identity-matching operation defined in the [FHI
 - Common patient matching (§ 6) applies.
 
 **Conformance:**
-- A Network **MUST** expose an `$IDI-match` endpoint for patient discovery and record location, at the address published in NPD. The operation conforms to the [FHIR Identity Matching IG](https://build.fhir.org/ig/HL7/fhir-identity-matching-ig/OperationDefinition-IDI-match.html).
+- A Network **MUST** expose an `$IDI-match` endpoint for patient discovery and record location, at the address published in NPD. The operation conforms to the [FHIR Identity Matching IG](https://hl7.org/fhir/us/identity-matching/STU2/OperationDefinition-IDI-match.html).
 - A Network **MUST** accept authenticated `$IDI-match` requests from other CMS-Aligned Networks on this endpoint.
+- A Network **MUST** respond to authorized patient access queries (HIPAA right of access) received via this pathway, regardless of whether a contractual agreement exists between the Network and the requesting party. Patient discovery and patient access **MUST NOT** be conditioned on a bilateral agreement.
+- A Network **MAY**, however, require a contractual agreement (e.g., participation or peering terms) as a precondition for responding to B2B (provider or payer system-to-system) queries.
+- A Network **MUST** publish this `$IDI-match` endpoint into the National Provider Directory (NPD) by October 1, 2026, and by that date **MUST** be capable of responding to patient access queries from any App listed in the CMS Medicare App Library.
 - A Network **MUST** apply the CMS patient matching rule (§ 6) to all queries received via Pathway 2.
 - Data retrieval **MAY** use federated FHIR or brokered FHIR; both are conformant.
+
+**Record Locator Service**
+
+A Network **MUST** implement record locator functionality by collaborating with CMS to determine efficient and timely models that:
+
+- reduce query load on the networks;
+- aid understanding of data completeness.
+
+Requests to the record locator service **MUST** be initiable by patients, providers, payers, and value-based care organizations.
 
 > **Note.** The exact wire profile of the RLS endpoint, the federation transport, and the authentication scheme between Networks are intentionally left to the CMS Interoperability Framework and the working-group operational profiles. The wire profile for brokered FHIR retrieval is an open question — see Appendix A.
 
@@ -577,7 +602,11 @@ A Network **MUST** produce audit logs for queries on its network, including:
 
 Audit logs **MUST** be organization-level at minimum. Audit logs **MUST** be kept for a minimum of 7 years, or longer if required by applicable law (45 CFR 164.530(j)).
 
-A Network **MUST** facilitate patient-facing audit access so patients can see, through their app, who queried their data. Implementations **MUST** conform to the IAS Audit Log API Specification (v1.0, February 2026), which defines the FHIR AuditEvent resource model, IAL2 OIDC token-based patient authentication, and endpoint discovery via RLS and NPD.
+A Network **MUST** facilitate patient-facing audit access so patients can see, through their app, who queried their data and where their data has been shared. The home Network — the intranetwork (§ 5.1) through which a patient-facing app is onboarded — is responsible for surfacing this audit information to the consumer apps it serves: a home Network **MUST** make audit logs available to the patient apps within its home network. Implementations **MUST** conform to the IAS Audit Log API Specification (v1.0, February 2026), which defines the FHIR AuditEvent resource model, IAL2 OIDC token-based patient authentication, and endpoint discovery via RLS and NPD.
+
+> **NOTE — SCOPE**
+>
+> Network-to-network audit event sharing is **NOT** in scope at this time. Each home Network is responsible only for surfacing audit information to the patient-facing apps it serves within its home network. A Network is **NOT** required to share audit event data with patient apps that do not belong to its home network.
 
 > **NOTE**
 >
@@ -587,7 +616,17 @@ EHRs facilitating ecosystem queries are subject to the same audit obligations as
 
 ---
 
-## 13. Security
+## 13. Appointment and Encounter Notifications
+
+A Network **MUST** provide appointment and encounter notifications for outpatient, telehealth, emergency department, and inpatient encounters using FHIR Subscriptions, where such notifications are permitted by existing law.
+
+> **Deferred — Not in Scope for July 4, 2026**
+>
+> Appointment and encounter notifications (§ 13) are not included in the July 4, 2026 GA requirements. The Notifications working group has not met in several months due to unresolved questions on network design and structure. This criterion will be revisited once those questions are resolved. Networks are not required to implement § 13 for initial CMS-Aligned recognition.
+
+---
+
+## 14. Security
 
 A Network MUST maintain HITRUST certification, scoped to the network's production environment that creates, receives, maintains, or transmits PHI on behalf of participants. This includes, at minimum, identity verification token validation, query routing, audit log generation, and patient matching reference data storage. Corporate functions that do not touch PHI are out of scope.
 
@@ -597,15 +636,15 @@ Business Associate Agreements (BAAs) MAY be required even where data is not dire
 
 ---
 
-## 14. Fees and Economics
+## 15. Fees and Economics
 
-### 14.1 Patient-Directed Access
+### 15.1 Patient-Directed Access
 
 A Network **MUST NOT** structure fees in a way that gates a patient's federal right to access their own data.
 
 The Fees exception at [45 CFR 171.302](https://www.ecfr.gov/current/title-45/part-171/section-171.302) and the ONC information blocking framework establish this floor. Cost recovery is permitted; platform fees structured to defeat patient access are not.
 
-### 14.2 Above the Floor
+### 15.2 Above the Floor
 
 A Network **MAY** set its own commercial terms for:
 
@@ -614,7 +653,7 @@ A Network **MAY** set its own commercial terms for:
 - voluntary commercial peering arrangements with other Networks;
 - value-added integration services.
 
-### 14.3 Inter-Network Settlement
+### 15.3 Inter-Network Settlement
 
 For patient-directed access traffic, inter-network settlement is **NOT** appropriate.
 
@@ -624,49 +663,15 @@ For other traffic types (treatment, payment, operations, prior auth, payer-to-pa
 
 ---
 
-## 15. Accountability
+## 16. Accountability
 
-A Network is accountable to CMS for meeting the obligations in §§ 3–14. Persistent failure is grounds for delisting from CMS-Aligned status on the same footing as failing any other Framework criterion.
+A Network is accountable to CMS for meeting the obligations in §§ 3–15. Persistent failure is grounds for delisting from CMS-Aligned status on the same footing as failing any other Framework criterion.
 
 A Network **MUST** publish operational metrics (response rates, query volumes, response times by use case) so apps and data holders can comparison-shop and so CMS can monitor adoption and performance. Network performance metrics appear in CMS scorecards (Framework criterion #19).
 
 Outages and partial responses happen; the obligation is to meet published response standards over time, not to be perfect.
 
 ---
-
-## 16. July 4, 2026 Framework Requirements
-
-By **July 4, 2026**, a Network **MUST** satisfy all four requirements below, as specified in the CMS Interoperability Framework.
-
-### 16.1 FHIR API Access
-
-A Network **MUST** provide or facilitate access to data using FHIR APIs that adhere to the [HL7 FHIR US Core Implementation Guide](https://hl7.org/fhir/us/core), including:
-
-- a complete and valid FHIR Capability Statement;
-- USCDI v3 (or later) data elements with terminology compliance — laboratories coded in LOINC, medications in RxNorm, conditions in SNOMED CT.
-
-A Network **SHOULD** leverage [FHIR Bulk Data Exchange](https://hl7.org/fhir/uv/bulkdata) to reduce stress on existing systems and enable the exchange of full data records.
-
-### 16.2 Chart Notes and Clinical Documents
-
-A Network **MUST** return chart notes and clinical documents — including radiology reports, scanned or faxed labs, and external specialist notes — in human-readable formats (PDF, TIFF, JPG) as FHIR attachments, as specified in USCDI v3. Ambient listening recordings **SHOULD** be returned where they are persisted and a standard exchange mechanism is available; the exchange profile for ambient recordings is TBD.
-
-### 16.3 Appointment and Encounter Notifications
-
-A Network **MUST** provide appointment and encounter notifications for outpatient, telehealth, emergency department, and inpatient encounters using FHIR Subscriptions, where such notifications are permitted by existing law.
-
-> **Deferred — Not in Scope for July 4, 2026**
->
-> Appointment and Encounter Notifications (§16.3) are not included in the July 4, 2026 GA requirements. The Notifications working group has not met in several months due to unresolved questions on network design and structure. This criterion will be revisited once those questions are resolved. Networks are not required to implement §16.3 for initial CMS-Aligned recognition.
-
-### 16.4 Record Locator Service
-
-A Network **MUST** implement record locator functionality by collaborating with CMS to determine efficient and timely models that:
-
-- reduce query load on the networks;
-- aid understanding of data completeness.
-
-Requests to the record locator service **MUST** be initiable by patients, providers, payers, and value-based care organizations.
 
 ## 17. Rules of the Road Attestation
 
