@@ -297,10 +297,10 @@
       <li><a href="#query"><span class="section-anchor">10</span>Query / Data Exchange</a></li>
       <li><a href="#npd"><span class="section-anchor">11</span>NPD Publication</a></li>
       <li><a href="#audit"><span class="section-anchor">12</span>Audit Logging</a></li>
-      <li><a href="#security"><span class="section-anchor">13</span>Security</a></li>
-      <li><a href="#fees"><span class="section-anchor">14</span>Fees &amp; Economics</a></li>
-      <li><a href="#accountability"><span class="section-anchor">15</span>Accountability</a></li>
-      <li><a href="#july"><span class="section-anchor">16</span>July 4, 2026 Framework Requirements</a></li>
+      <li><a href="#notifications"><span class="section-anchor">13</span>Appointment &amp; Encounter Notifications</a></li>
+      <li><a href="#security"><span class="section-anchor">14</span>Security</a></li>
+      <li><a href="#fees"><span class="section-anchor">15</span>Fees &amp; Economics</a></li>
+      <li><a href="#accountability"><span class="section-anchor">16</span>Accountability</a></li>
       <li><a href="#rules-attestation"><span class="section-anchor">17</span>Rules of the Road Attestation</a></li>
       <li><a href="#open-questions">Appendix A — Open Questions</a></li>
       <li><a href="#sources">Appendix B — Source Documents</a></li>
@@ -376,7 +376,7 @@
       BCP&nbsp;14 (<a href="https://www.rfc-editor.org/rfc/rfc2119">RFC&nbsp;2119</a>, <a href="https://www.rfc-editor.org/rfc/rfc8174">RFC&nbsp;8174</a>) when, and only when, they
       appear in all capitals.</p>
       <p>A network conforms to this specification when it satisfies every
-      <span class="kw must">MUST</span> in §§ 3–14 and is in good standing under § 15.</p>
+      <span class="kw must">MUST</span> in §§ 3–15 and is in good standing under § 16.</p>
     </section>
 
     <section id="terminology">
@@ -413,7 +413,7 @@
       <p><strong>Inter-Network Settlement.</strong> A commercial arrangement in which one Network
       compensates another for carrying or fulfilling queries that originate from the first Network's
       participants — analogous to transit fees or peering settlements in telecommunications.
-      Settlement is prohibited for patient-directed access traffic (§ 14.3) and is optional for
+      Settlement is prohibited for patient-directed access traffic (§ 15.3) and is optional for
       other traffic types.</p>
       <p><strong>NPD.</strong> National Provider Directory. The authoritative public registry of
       ecosystem participants, endpoints, and inter-network connections.</p>
@@ -451,11 +451,32 @@
         <li>Respond to authorized queries completely and without undue obstruction, subject to applicable access controls and authorization requirements (§ 10).</li>
         <li>Publish to NPD (§ 11).</li>
         <li>Produce audit logs accessible to patients (§ 12).</li>
-        <li>Maintain HITRUST security validation (§ 13).</li>
-        <li>Comply with the fees floor (§ 14).</li>
-        <li>Remain accountable to CMS for ongoing compliance (§ 15).</li>
+        <li>Maintain HITRUST security validation (§ 14).</li>
+        <li>Comply with the fees floor (§ 15).</li>
+        <li>Remain accountable to CMS for ongoing compliance (§ 16).</li>
         <li>Attest to the same "rules of the road" of all other CMS-Aligned Networks (§ 17).</li>
       </ol>
+
+      <h3>3.3 FHIR API Access</h3>
+      <p>A Network <span class="kw must">MUST</span> provide or facilitate access to data using FHIR
+      APIs that adhere to the
+      <a href="https://hl7.org/fhir/us/core">HL7 FHIR US Core Implementation Guide</a>, including:</p>
+      <ul>
+        <li>a complete and valid FHIR Capability Statement;</li>
+        <li>USCDI v3 (or later) data elements with terminology compliance — laboratories coded in
+        LOINC, medications in RxNorm, conditions in SNOMED CT.</li>
+      </ul>
+      <p>A Network <span class="kw should">SHOULD</span> leverage
+      <a href="https://hl7.org/fhir/uv/bulkdata">FHIR Bulk Data Exchange</a> to reduce stress on
+      existing systems and enable the exchange of full data records.</p>
+
+      <h3>3.4 Chart Notes and Clinical Documents</h3>
+      <p>A Network <span class="kw must">MUST</span> return chart notes and clinical documents —
+      including radiology reports, scanned or faxed labs, and external specialist notes — in
+      human-readable formats (PDF, TIFF, JPG) as FHIR attachments, as specified in USCDI v3.
+      Ambient listening recordings <span class="kw should">SHOULD</span> be returned where they are
+      persisted and a standard exchange mechanism is available; the exchange profile for ambient
+      recordings is TBD.</p>
     </section>
 
     <section id="obligations">
@@ -509,7 +530,7 @@
 
       <h3 id="path-2">5.2 Pathway 2 — RLS Network Search ($IDI-match)</h3>
       <p>Discovery uses <code>$IDI-match</code>, the identity-matching operation defined in the
-      <a href="https://build.fhir.org/ig/HL7/fhir-identity-matching-ig/OperationDefinition-IDI-match.html">FHIR Identity Matching Implementation Guide</a>,
+      <a href="https://hl7.org/fhir/us/identity-matching/STU2/OperationDefinition-IDI-match.html">FHIR Identity Matching Implementation Guide</a>,
       against the published RLS endpoints of other
       CMS-Aligned Networks. Data retrieval may use either <strong>federated FHIR</strong> (each
       responder serves its own data directly) or <strong>brokered FHIR</strong> (a network broker
@@ -523,7 +544,7 @@
       </ul>
       <h4>Conformance</h4>
       <ul>
-        <li>A Network <span class="kw must">MUST</span> expose an <code>$IDI-match</code> endpoint for patient discovery and record location, at the address published in NPD. The operation conforms to the <a href="https://build.fhir.org/ig/HL7/fhir-identity-matching-ig/OperationDefinition-IDI-match.html">FHIR Identity Matching IG</a>.</li>
+        <li>A Network <span class="kw must">MUST</span> expose an <code>$IDI-match</code> endpoint for patient discovery and record location, at the address published in NPD. The operation conforms to the <a href="https://hl7.org/fhir/us/identity-matching/STU2/OperationDefinition-IDI-match.html">FHIR Identity Matching IG</a>.</li>
         <li>A Network <span class="kw must">MUST</span> accept authenticated <code>$IDI-match</code> requests from other CMS-Aligned Networks on this endpoint.</li>
         <li>A Network <span class="kw must">MUST</span> respond to authorized patient access queries (HIPAA right of access) received via this pathway, regardless of whether a contractual agreement exists between the Network and the requesting party. Patient discovery and patient access <span class="kw must-not">MUST NOT</span> be conditioned on a bilateral agreement.</li>
         <li>A Network <span class="kw may">MAY</span>, however, require a contractual agreement (e.g., participation or peering terms) as a precondition for responding to B2B (provider or payer system-to-system) queries.</li>
@@ -531,6 +552,15 @@
         <li>A Network <span class="kw must">MUST</span> apply the CMS patient matching rule (§ 6) to all queries received via Pathway 2.</li>
         <li>Data retrieval <span class="kw may">MAY</span> use federated FHIR or brokered FHIR; both are conformant.</li>
       </ul>
+      <h4>Record Locator Service</h4>
+      <p>A Network <span class="kw must">MUST</span> implement record locator functionality by
+      collaborating with CMS to determine efficient and timely models that:</p>
+      <ul>
+        <li>reduce query load on the networks;</li>
+        <li>aid understanding of data completeness.</li>
+      </ul>
+      <p>Requests to the record locator service <span class="kw must">MUST</span> be initiable by
+      patients, providers, payers, and value-based care organizations.</p>
       <div class="callout warn">
         <span class="label">Note</span>
         The exact wire profile of the RLS endpoint, the federation transport, and the
@@ -962,8 +992,19 @@
       routing through them.</p>
     </section>
 
+    <section id="notifications">
+      <h2><span class="section-anchor">13</span>Appointment and Encounter Notifications</h2>
+      <p>A Network <span class="kw must">MUST</span> provide appointment and encounter notifications for
+      outpatient, telehealth, emergency department, and inpatient encounters using FHIR Subscriptions,
+      where such notifications are permitted by existing law.</p>
+      <div class="callout warn">
+        <span class="label">Deferred — Not in Scope for July 4, 2026</span>
+        <p>Appointment and encounter notifications (§ 13) are not included in the July 4, 2026 GA requirements. The Notifications working group has not met in several months due to unresolved questions on network design and structure. This criterion will be revisited once those questions are resolved. Networks are not required to implement § 13 for initial CMS-Aligned recognition.</p>
+      </div>
+    </section>
+
     <section id="security">
-      <h2><span class="section-anchor">13</span>Security</h2>
+      <h2><span class="section-anchor">14</span>Security</h2>
       <p>A Network <span class="kw must">MUST</span> maintain <strong>HITRUST certification</strong>, scoped to the network's production environment that creates, receives, maintains, or transmits PHI on behalf of participants. This includes, at minimum, identity verification token validation, query routing, audit log generation, and patient matching reference data storage. Corporate functions that do not touch PHI are out of scope.</p>
       <p>HITRUST certification does <strong>NOT</strong> replace compliance with HIPAA, the Privacy
       Act, or applicable federal and state privacy and security laws.</p>
@@ -974,16 +1015,16 @@
     </section>
 
     <section id="fees">
-      <h2><span class="section-anchor">14</span>Fees &amp; Economics</h2>
+      <h2><span class="section-anchor">15</span>Fees &amp; Economics</h2>
 
-      <h3>14.1 Patient-Directed Access</h3>
+      <h3>15.1 Patient-Directed Access</h3>
       <p>A Network <span class="kw must-not">MUST NOT</span> structure fees in a way that gates a
       patient's federal right to access their own data.</p>
       <p>The Fees exception at <a href="https://www.ecfr.gov/current/title-45/part-171/section-171.302">45 CFR 171.302</a>
       and the ONC information blocking framework establish this floor. Cost recovery is permitted;
       platform fees structured to defeat patient access are not.</p>
 
-      <h3>14.2 Above the Floor</h3>
+      <h3>15.2 Above the Floor</h3>
       <p>A Network <span class="kw may">MAY</span> set its own commercial terms for:</p>
       <ul>
         <li>premium services beyond baseline;</li>
@@ -992,7 +1033,7 @@
         <li>value-added integration services.</li>
       </ul>
 
-      <h3>14.3 Inter-Network Settlement</h3>
+      <h3>15.3 Inter-Network Settlement</h3>
       <p>For patient-directed access traffic, inter-network settlement is <strong>NOT</strong>
       appropriate.</p>
       <p>For other traffic types (treatment, payment, operations, prior auth, payer-to-payer), Networks
@@ -1007,8 +1048,8 @@
     </section>
 
     <section id="accountability">
-      <h2><span class="section-anchor">15</span>Accountability</h2>
-      <p>A Network is accountable to CMS for meeting the obligations in §§ 3–14. Persistent failure is
+      <h2><span class="section-anchor">16</span>Accountability</h2>
+      <p>A Network is accountable to CMS for meeting the obligations in §§ 3–15. Persistent failure is
       grounds for delisting from CMS-Aligned status on the same footing as failing any other
       Framework criterion.</p>
       <p>A Network <span class="kw must">MUST</span> publish operational metrics (response rates, query
@@ -1017,52 +1058,6 @@
       (Framework criterion #19).</p>
       <p>Outages and partial responses happen; the obligation is to meet published response standards
       over time, not to be perfect.</p>
-    </section>
-
-    <section id="july">
-      <h2><span class="section-anchor">16</span>July 4, 2026 Framework Requirements</h2>
-      <p>By <strong>July 4, 2026</strong>, a Network <span class="kw must">MUST</span> satisfy all four
-      requirements below, as specified in the CMS Interoperability Framework.</p>
-
-      <h3>16.1 FHIR API Access</h3>
-      <p>A Network <span class="kw must">MUST</span> provide or facilitate access to data using FHIR
-      APIs that adhere to the
-      <a href="https://hl7.org/fhir/us/core">HL7 FHIR US Core Implementation Guide</a>, including:</p>
-      <ul>
-        <li>a complete and valid FHIR Capability Statement;</li>
-        <li>USCDI v3 (or later) data elements with terminology compliance — laboratories coded in
-        LOINC, medications in RxNorm, conditions in SNOMED CT.</li>
-      </ul>
-      <p>A Network <span class="kw should">SHOULD</span> leverage
-      <a href="https://hl7.org/fhir/uv/bulkdata">FHIR Bulk Data Exchange</a> to reduce stress on
-      existing systems and enable the exchange of full data records.</p>
-
-      <h3>16.2 Chart Notes and Clinical Documents</h3>
-      <p>A Network <span class="kw must">MUST</span> return chart notes and clinical documents —
-      including radiology reports, scanned or faxed labs, and external specialist notes — in
-      human-readable formats (PDF, TIFF, JPG) as FHIR attachments, as specified in USCDI v3.
-      Ambient listening recordings <span class="kw should">SHOULD</span> be returned where they are
-      persisted and a standard exchange mechanism is available; the exchange profile for ambient
-      recordings is TBD.</p>
-
-      <h3>16.3 Appointment and Encounter Notifications</h3>
-      <p>A Network <span class="kw must">MUST</span> provide appointment and encounter notifications for
-      outpatient, telehealth, emergency department, and inpatient encounters using FHIR Subscriptions,
-      where such notifications are permitted by existing law.</p>
-      <div class="callout warn">
-        <span class="label">Deferred — Not in Scope for July 4, 2026</span>
-        <p>Appointment and Encounter Notifications (§16.3) are not included in the July 4, 2026 GA requirements. The Notifications working group has not met in several months due to unresolved questions on network design and structure. This criterion will be revisited once those questions are resolved. Networks are not required to implement §16.3 for initial CMS-Aligned recognition.</p>
-      </div>
-
-      <h3>16.4 Record Locator Service</h3>
-      <p>A Network <span class="kw must">MUST</span> implement record locator functionality by
-      collaborating with CMS to determine efficient and timely models that:</p>
-      <ul>
-        <li>reduce query load on the networks;</li>
-        <li>aid understanding of data completeness.</li>
-      </ul>
-      <p>Requests to the record locator service <span class="kw must">MUST</span> be initiable by
-      patients, providers, payers, and value-based care organizations.</p>
     </section>
 
     <section id="rules-attestation">
