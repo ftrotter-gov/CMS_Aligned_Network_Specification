@@ -171,21 +171,21 @@ The Network serves queries against data holders that have contracted directly wi
 **Conformance:**
 - The Network **MUST** respond to authorized queries for any data holder on the network across applicable use cases.
 
-### 5.2 Pathway 2 — RLS Network Search ($IDI-match)
+### 5.2 Pathway 2 — RLS Network Search ($match)
 
-Discovery uses `$IDI-match`, the identity-matching operation defined in the [FHIR Identity Matching Implementation Guide](https://hl7.org/fhir/us/identity-matching/STU2/OperationDefinition-IDI-match.html), against the published RLS endpoints of other CMS-Aligned Networks. Data retrieval may use either **federated FHIR** (each responder serves its own data directly) or **brokered FHIR** (a network broker aggregates and returns data on behalf of multiple endpoints). Both retrieval modes are conformant.
+Discovery uses `$match`, the [FHIR Patient `$match` operation](https://hl7.org/fhir/R4/patient-operation-match.html), against the published RLS endpoints of other CMS-Aligned Networks. `$match` is a Master Patient Index (MPI) operation: a requester submits a (possibly partial) `Patient` resource, and the responder returns a `Bundle` of candidate `Patient` records ordered by likelihood, each annotated with a match score (`0`–`1`) and a match-grade extension (`certain`, `probable`, or `possible`). The optional `onlyCertainMatches` parameter restricts results to high-confidence matches, and `count` caps the number of candidates returned. Data retrieval may use either **federated FHIR** (each responder serves its own data directly) or **brokered FHIR** (a network broker aggregates and returns data on behalf of multiple endpoints). Both retrieval modes are conformant.
 
 **Assumptions:**
 - Every Network exposes a standardized RLS endpoint at a known address listed in NPD.
-- The endpoint accepts authenticated `$IDI-match` requests from other CMS-Aligned Networks and Apps in the ecosystem.
+- The endpoint accepts authenticated `$match` requests from other CMS-Aligned Networks and Apps in the ecosystem.
 - Common patient matching (§ 6) applies.
 
 **Conformance:**
-- A Network **MUST** expose an `$IDI-match` endpoint for patient discovery and record location, at the address published in NPD. The operation conforms to the [FHIR Identity Matching IG](https://hl7.org/fhir/us/identity-matching/STU2/OperationDefinition-IDI-match.html).
-- A Network **MUST** accept authenticated `$IDI-match` requests from other CMS-Aligned Networks on this endpoint.
+- A Network **MUST** expose an `$match` endpoint for patient discovery and record location, at the address published in NPD. The operation conforms to the [FHIR Patient `$match` operation](https://hl7.org/fhir/R4/patient-operation-match.html).
+- A Network **MUST** accept authenticated `$match` requests from other CMS-Aligned Networks on this endpoint.
 - A Network **MUST** respond to authorized patient access queries (HIPAA right of access) received via this pathway, regardless of whether a contractual agreement exists between the Network and the requesting party. Patient discovery and patient access **MUST NOT** be conditioned on a bilateral agreement.
 - A Network **MAY**, however, require a contractual agreement (e.g., participation or peering terms) as a precondition for responding to B2B (provider or payer system-to-system) queries.
-- A Network **MUST** publish this `$IDI-match` endpoint into the National Provider Directory (NPD) by October 1, 2026, and by that date **MUST** be capable of responding to patient access queries from any App listed in the CMS Medicare App Library.
+- A Network **MUST** publish this `$match` endpoint into the National Provider Directory (NPD) by October 1, 2026, and by that date **MUST** be capable of responding to patient access queries from any App listed in the CMS Medicare App Library.
 - A Network **MUST** apply the CMS patient matching rule (§ 6) to all queries received via Pathway 2.
 - Data retrieval **MAY** use federated FHIR or brokered FHIR; both are conformant.
 
@@ -232,11 +232,11 @@ Two networks enter a direct contractual arrangement to exchange data with each o
 
 ## 6. Patient Matching
 
-A Network **MUST** implement the CMS-approved patient matching logic specified in the CMS Interoperability Framework. The current MVP standard is the **26-combination matching rule**.
+A Network **MUST** implement the CMS-approved patient matching logic specified in the CMS Interoperability Framework. The current MVP standard evaluates **multiple permutations of patient demographic fields** to determine a match.
 
-A Network **MUST** respond when a query received via any pathway in § 5 matches a patient record across any of the 26 specified combinations, provided that authorization requirements under § 9 are satisfied. A match result alone does not create a response obligation if authorization has not been granted.
+A Network **MUST** respond when a query received via any pathway in § 5 matches a patient record across any of the specified field permutations, provided that authorization requirements under § 9 are satisfied. A match result alone does not create a response obligation if authorization has not been granted.
 
-> The exact field list and combination matrix are explained in a different specification, not duplicated here. Will link when it's available. 
+> The exact field list and combination matrix are explained in a different specification, not duplicated here. See the [CMS Patient Matching Proposal (v3.3.0)](https://docs.google.com/document/d/1ABHR6e4N-K9lEj1vc7DuzoAy8CuaAqwqAZSpJH9T4Yg/edit?tab=t.0).
 
 ---
 
@@ -292,8 +292,6 @@ Authentication establishes that the party making a request is who they claim to 
 
 For patient-directed access, identity is established via IAL2 identity verification through a CMS-approved credential service provider (CSP) — such as CLEAR or ID.me — combined with app authorization via SMART App Standalone Launch.
 
-**Reference Implementation — IAL2 with Manual Authorization (SMART App Standalone Launch)**
-
 This flow modifies the SMART App Launch v2.2.0 Standalone Launch pattern to support IAL2
 patient identity. Three trust pillars are required:
 
@@ -329,8 +327,6 @@ login-bypass mechanism described here remains unchanged.
 ### 8.2 Provider and Payer Access — B2B
 
 For system-to-system access by providers and payers, authentication uses the payer-initiated B2B integration pattern grounded in the trust signals established at registration (§ 7). The current reference implementation uses UDAP B2B flows; whether UDAP remains the required mechanism or is joined or superseded by CMS-signed software statements for B2B client types is an open architectural question — see § 7.1.
-
-**Reference Implementation — B2B System-to-System Integration**
 
 **Primary pattern — SMART Backend Services + direct FHIR queries**
 
@@ -569,6 +565,8 @@ Networks and data holders **SHOULD** design their APIs to accommodate future pat
 
 ## 11. National Provider Directory Publication
 
+The structure, formats, and data elements for NPD publication are defined in the [HTE Data Release Specifications](https://github.com/ftrotter-gov/HTE_data_release_specifications). A Network **MUST** conform to those specifications when publishing to NPD.
+
 A Network **MUST** publish to NPD:
 
 - its onboarded participants (apps, providers, payers, delegated tech solutions), where "providers" means both provider organizations and individual practitioners affiliated with those organizations;
@@ -685,7 +683,7 @@ These are gaps identified in source materials that this draft does not resolve. 
 
 | # | Open Question | Source |
 |---|---|---|
-| A1 | Wire profile of the standardized RLS / federation endpoint (transport, authentication, payload schema for `$IDI-match` requests and responses). | Framework defers; Connectivity Pathways doc notes this is the baseline interface but the operational profile is not fixed. |
+| A1 | Wire profile of the standardized RLS / federation endpoint (transport, authentication, payload schema for `$match` requests and responses). | Framework defers; Connectivity Pathways doc notes this is the baseline interface but the operational profile is not fixed. |
 | A1b | Wire profile for brokered FHIR retrieval under Pathway 2 — how a network broker aggregates responses from multiple RLS endpoints and returns them to the requesting Network (payload shape, error handling, partial-response semantics). | Introduced by the shift from federated-only to dual retrieval modes in Pathway 2; not yet specified. |
 | A2 | Mechanism for preventing endpoint-spamming under Pathway 3 (geo-search constraints, rate limits, query-shape rules). | Connectivity Pathways doc explicitly raises this as an unresolved question. |
 | A3 | Whether networks may charge data holders per query for required HTE use cases, and the same for payer-to-provider queries. | Workgroup Alternative Proposal § 2.3 — raised but not resolved by CMS in source materials. |
