@@ -4,8 +4,8 @@
 
 **June 22, 2026**
 
-**This version:** `can-spec/0.5`  
-**Latest published version:** August 5, 2026  
+**This version:** `can-spec/0.6`  
+**Latest published version:** September 14, 2026  
 **Editor:** Liz Lewis (b.well Connected Health)  
 **Feedback:** via CMS Health Technology Ecosystem working groups
 
@@ -21,7 +21,7 @@ The immediate focus of this specification is the use cases currently defined in 
 
 This document specifies the technical and operational requirements a Health Information Network MUST meet to be recognized as a **CMS-Aligned Network (Network)** under the CMS Health Technology Ecosystem (HTE).
 
-The specification covers the three core obligations of a CMS-Aligned Network, the three required connectivity pathways plus one optional pathway, patient matching, auto-registration, authentication, authorization, query handling, National Provider Directory (NPD) publication, audit logging, security validation, fees, and accountability.
+The specification covers the three core obligations of a CMS-Aligned Network, the three required connectivity pathways plus one optional pathway, patient matching, dynamic registration, authentication, authorization, query handling, National Provider Directory (NPD) publication, audit logging, security validation, fees, and accountability.
 
 This specification deliberately covers **network obligations only**. Trust pathways for apps, EHRs, providers, and payers are referenced where they intersect network behavior but are specified elsewhere.
 
@@ -31,7 +31,7 @@ This specification deliberately covers **network obligations only**. Trust pathw
 
 This is an editor's draft assembled from working-group materials. It has no normative force on its own. The authoritative source for CMS-Aligned status is the **CMS Interoperability Framework** published by CMS at <https://www.cms.gov/health-technology-ecosystem/interoperability-framework>. Where this document and the Framework conflict, the Framework controls.
 
-This draft is offered as a consolidated rendering of network-side requirements so that implementers can evaluate conformance against a single artifact. Working-group input is welcome on operational specifics (auto-registration profiles, audit standards, dispute resolution, presumptive-eligibility scope).
+This draft is offered as a consolidated rendering of network-side requirements so that implementers can evaluate conformance against a single artifact. Working-group input is welcome on operational specifics (dynamic registration profiles, audit standards, dispute resolution, presumptive-eligibility scope).
 
 ---
 
@@ -39,7 +39,7 @@ This draft is offered as a consolidated rendering of network-side requirements s
 
 The keywords **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **MAY**, and **OPTIONAL** in this document are to be interpreted as described in BCP 14 ([RFC 2119](https://www.rfc-editor.org/rfc/rfc2119), [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174)) when, and only when, they appear in all capitals.
 
-A network conforms to this specification when it satisfies every **MUST** in §§ 3–15 and is in good standing under § 16.
+A network conforms to this specification when it satisfies every **MUST** in §§ 3–14 and is in good standing under § 15.
 
 ---
 
@@ -71,7 +71,7 @@ A network conforms to this specification when it satisfies every **MUST** in §�
 
 **Good Standing** — As defined in § 4.3: completed home-network onboarding, current on obligations, no active unresolved complaints, passed operational health checks, not suspended.
 
-**Inter-Network Settlement** — A commercial arrangement in which one Network compensates another for carrying or fulfilling queries that originate from the first Network's participants — analogous to transit fees or peering settlements in telecommunications. Settlement is prohibited for patient-directed access traffic (§ 15.3) and is optional for other traffic types.
+**Inter-Network Settlement** — A commercial arrangement in which one Network compensates another for carrying or fulfilling queries that originate from the first Network's participants — analogous to transit fees or peering settlements in telecommunications. Settlement is prohibited for patient-directed access traffic (§ 14.3) and is optional for other traffic types.
 
 **NPD** — National Provider Directory. The authoritative public registry of ecosystem participants, endpoints, and inter-network connections.
 
@@ -106,16 +106,16 @@ Every CMS-Aligned Network **MUST**:
 1. Meet the three core obligations in § 4.
 2. Support all three connectivity pathways in § 5.
 3. Use the CMS-approved patient matching logic (§ 6).
-4. Honor auto-registration and presumptive eligibility for participants in good standing on another home Network (§ 7).
+4. Honor dynamic registration and presumptive eligibility for participants in good standing on another home Network (§ 7).
 5. Authenticate participants using a federally grounded credential — IAL2 for patient-facing (B2C) flows, a recognized software statement for system-to-system (B2B) flows — no portal login may be required as a precondition (§ 8).
-6. Implement authorization per patient preferences (§ 9).
-7. Respond to authorized queries completely and without undue obstruction, subject to applicable access controls and authorization requirements (§ 10).
-8. Publish to NPD (§ 11).
-9. Produce audit logs accessible to patients (§ 12).
-10. Maintain HITRUST security validation (§ 14).
-11. Comply with the fees floor (§ 15).
-12. Remain accountable to CMS for ongoing compliance (§ 16).
-13. Attest to the same "rules of the road" of all other CMS-Aligned Networks (§ 17).
+6. Implement authorization per patient preferences (§ 8.1).
+7. Respond to authorized queries completely and without undue obstruction, subject to applicable access controls and authorization requirements (§ 9).
+8. Publish to NPD (§ 10).
+9. Produce audit logs accessible to patients (§ 11).
+10. Maintain HITRUST security validation (§ 13).
+11. Comply with the fees floor (§ 14).
+12. Remain accountable to CMS for ongoing compliance (§ 15).
+13. Attest to the same "rules of the road" of all other CMS-Aligned Networks (§ 16).
 
 ### 3.3 FHIR API Access
 
@@ -149,6 +149,8 @@ A Network **MUST NOT** attest to federal legal compliance on behalf of its parti
 A Network **MUST** suspend a participant's good-standing report when the participant has been suspended or flagged by the network, or has failed an operational health check that the network publishes.
 
 ### 4.3 Respond to credentialed tech solutions from other home networks
+
+**Good Standing** means a participant has completed home-network onboarding, is current on membership obligations, has no active unresolved complaints or enforcement actions reported to the network, has passed applicable operational health checks, and has not been suspended or flagged by any CMS-Aligned Network.
 
 When a tech solution presents valid Federal Trust Signals **and** is reported in good standing on its home Network, the receiving Network **MUST** respond to its queries.
 
@@ -232,31 +234,27 @@ Two networks enter a direct contractual arrangement to exchange data with each o
 
 ## 6. Patient Matching
 
-A Network **MUST** implement the CMS-approved patient matching logic specified in the CMS Interoperability Framework. The current MVP standard evaluates **multiple permutations of patient demographic fields** to determine a match.
+A Network **MUST** implement the CMS-approved patient matching logic specified in the CMS Interoperability Framework. The current standard evaluates **combinations of patient demographic fields** — either directly, or in a two-step household-then-individual resolution for certain field combinations — to determine a match.
 
-A Network **MUST** respond when a query received via any pathway in § 5 matches a patient record across any of the specified field permutations, provided that authorization requirements under § 9 are satisfied. A match result alone does not create a response obligation if authorization has not been granted.
+A Network **MUST** respond when a query received via any pathway in § 5 matches a patient record across any of the specified field permutations, provided that authorization requirements under § 8 are satisfied. A match result alone does not create a response obligation if authorization has not been granted.
 
-> The exact field list and combination matrix are explained in a different specification, not duplicated here. See the [CMS Patient Matching Proposal (v3.3.0)](https://docs.google.com/document/d/1ABHR6e4N-K9lEj1vc7DuzoAy8CuaAqwqAZSpJH9T4Yg/edit?tab=t.0).
+> The exact field list and combination matrix are explained in a different specification, not duplicated here. See the [CMS Patient Matching Proposal (v3.4.0)](https://docs.google.com/document/d/1NytpfZ05aokS-gD7uDIQE7gEyms9zMgoiaIah_w4VTE/edit?tab=t.0).
 
 ---
 
-## 7. Auto-Registration and Presumptive Eligibility
+## 7. Dynamic Registration and Presumptive Eligibility
 
-### 7.1 Auto-Registration
+### 7.1 Dynamic Registration
 
 Registration at any Network data holder uses [RFC 7591 Dynamic Client Registration](https://www.rfc-editor.org/rfc/rfc7591) as the shared wire format. A client presents a signed software statement at the `/register` endpoint as the `software_statement` parameter. RFC 7591 is the mechanism; the software statement is the trust signal. Different issuers of software statements represent different trust paths — they share the same wire format but are not interchangeable.
 
+Which pathway a Network must accept — **CMS-signed software statements** or **UDAP X.509 certificates** — is pending Workgroup consensus.
+
 **CMS-signed software statements** can streamline dynamic registration for *many kinds of clients* — patient-facing apps, payers, providers, delegated tech solutions, and networks acting as clients — without requiring CMS to operate a CA or issue X.509 certificates. A CMS-signed software statement is a short-lived JWT (e.g., 24-hour TTL) signed by CMS that asserts a client's status in a CMS-maintained registry and binds it to a verified `jwks_uri`. A receiving authorization server can accept it without per-network re-vetting. To date, CMS's most concrete commitment is listing patient-facing apps in the **Medicare App Library** — that is an important and well-scoped starting point. The architecture of this spec does not treat it as the ceiling: as CMS extends registry coverage to other actor types, the same mechanism applies. See Josh Mandel, "Software Statements for the Medicare App Library," May 26, 2026.
 
-A Network **MUST** accept a valid CMS-signed software statement as sufficient for dynamic client registration, without additional per-network vetting, for any client type for which CMS has published a registry and issued a statement.
+**UDAP X.509 certificates** are the alternate pathway under consideration. [UDAP](https://www.udap.org/udap-ig-b2b-health-apps) is a specific profile of RFC 7591 dynamic client registration that uses X.509 certificates issued by a trust-community CA. It addresses the same core problem as CMS-signed software statements — enabling a client to be recognized across multiple Data Holders without bilateral out-of-band agreements — but via a CA-anchored certificate chain rather than a CMS-issued JWT.
 
-> **⚠ CONTESTED — Architecture Decision**
->
-> **Should UDAP / X.509 remain as a required or alternate dynamic registration path?**
->
-> [UDAP](https://www.udap.org/udap-ig-b2b-health-apps) is a specific profile of RFC 7591 dynamic client registration that uses X.509 certificates issued by a trust-community CA. It addresses the same core problem as CMS-signed software statements — enabling a client to be recognized across multiple Data Holders without bilateral out-of-band agreements — but via a CA-anchored certificate chain rather than a CMS-issued JWT. Having two mechanisms that address the same problem creates implementation complexity.
->
-> The question of whether UDAP / X.509 should remain a required path, an optional path, or be superseded by CMS software statements as CMS registry coverage grows is unresolved and must be decided by the working group before this section is finalized.
+Pending that decision, a Network **MUST** accept a valid CMS-signed software statement as sufficient for dynamic client registration, without additional per-network vetting, for any client type for which CMS has published a registry and issued a statement. Whether UDAP / X.509 remains a required path, becomes an optional path, or is superseded entirely by CMS software statements as CMS registry coverage grows will be resolved by the Workgroup before this section is finalized.
 
 All recognized credential types reduce to RFC 7591 plumbing at the receiving authorization server. The server **SHOULD** route signature validation by issuer: CMS published JWKS for CMS-signed software statements; UDAP trust community CA chain for UDAP software statements (if UDAP is retained as a recognized path).
 
@@ -266,7 +264,7 @@ The timeline is set by the CMS Interoperability Framework.
 
 A Network **MUST NOT** impose duplicative trust gating on top of the federally grounded credentials. Operational coordination (abuse contacts, rate-limit, security procedures, support channels) **MAY** be coordinated.
 
-Manual registration **MAY** be supported up until the deadline of October 1, 2026, at which time all participants in the HTE **MUST** support auto or dynamic registration.
+Manual registration **MAY** be supported up until the deadline of October 1, 2026, at which time all participants in the HTE **MUST** support dynamic registration.
 
 ### 7.2 Presumptive Eligibility
 
@@ -284,16 +282,19 @@ A Network **MAY** suspend presumptive eligibility for cause, including operation
 
 ---
 
-## 8. Authentication
+## 8. Authentication and Authorization
 
-Authentication establishes that the party making a request is who they claim to be. The model differs between patient-facing (B2C) and system-to-system (B2B) flows. A Network, and every EHR or data holder it routes to, **MUST** respond to authorized queries from properly credentialed parties without requiring portal login as a precondition — the credential models below are the accepted authentication path; portal login is not.
+Authentication establishes that the party making a request is who they claim to be; authorization establishes what that party is entitled to access and under what conditions. In this specification's OAuth-based flows, a single token request typically carries both together — the client's authentication claims and the authorization context (patient consent, purpose of use) travel in the same signed assertion, not as separate steps. This section is organized by audience — patient-facing (B2C) and provider/payer (B2B) — rather than by phase, consistent with how the [HL7 FAST Security IG](https://build.fhir.org/ig/HL7/fhir-udap-security-ig/index.html) itself structures authorization and authentication as a single topic split the same way.
+
+A Network, and every EHR or data holder it routes to, **MUST** respond to authorized queries from properly credentialed parties without requiring portal login as a precondition — the credential models below are the accepted authentication path; portal login is not.
 
 ### 8.1 Patient Access — B2C (IAL2 + SMART App Launch)
 
 For patient-directed access, identity is established via IAL2 identity verification through a CMS-approved credential service provider (CSP) — such as CLEAR or ID.me — combined with app authorization via SMART App Standalone Launch.
 
 This flow modifies the SMART App Launch v2.2.0 Standalone Launch pattern to support IAL2
-patient identity. Three trust pillars are required:
+patient identity and eliminate per-data-holder authorization screens. Three trust pillars are
+required:
 
 1. **Patient Authentication (IAL2).** The patient is identity-proofed by a CMS-approved CSP
    (e.g., CLEAR, ID.me, or a state-issued digital ID card). The CSP issues a high-assurance
@@ -303,69 +304,34 @@ patient identity. Three trust pillars are required:
    authentication (RS384 or ES384). The app publishes a JWKS URL; the authorization server
    validates the app's signature against the corresponding public key.
 
-3. **Patient Consent (Authorization Server UI).** Because the IAL2 token establishes identity but
-   not authorization, the authorization server renders its native SMART App Launch consent UI
-   so the patient explicitly approves the requested granular FHIR scopes. No portal login is
-   required — the login screen is bypassed because the IAL2 `id_token` is already present.
+3. **Patient Consent (Consent Artifact).** Because the IAL2 token establishes identity but not
+   authorization, the app conveys the patient's recorded data-sharing preferences as a signed
+   consent artifact rather than relying on the authorization server's native consent UI. The
+   authorization server validates this artifact against the requested scopes and, if it is
+   complete and consistent, issues access without rendering a separate per-data-holder
+   authorization screen. Neither portal login nor an additional consent screen is required —
+   both are bypassed because the IAL2 `id_token` and the consent artifact are already present.
 
 **Flow summary**
 
 The app generates a `client_assertion` JWT (signed with its private key) that nests the CSP-issued
-IAL2 `id_token` within a `cms_smart` extension (`version: "2"`, `purpose_of_use: "PATRQT"`). The
-authorization request MUST use `POST /authorize` (`application/x-www-form-urlencoded`) — GET
-is not permitted because the nested token makes the payload too large for a query string (risk of
-HTTP 414). The authorization server validates the app's signature via its published JWKS and
-validates the IAL2 `id_token`, then bypasses the login screen and renders the consent UI. After
-the patient approves the requested FHIR scopes, the server issues an authorization code. The
-app exchanges it via `POST /token` with PKCE (`code_challenge_method: S256`) and a fresh
+IAL2 `id_token`, together with a `consent_reference` Bundle documenting the patient's recorded
+preferences, within a `cms_smart` extension (`version: "2"`, `purpose_of_use: "PATRQT"`) — see
+§ 8.1.3.1 for the Bundle's contents and its relationship to the SMART Permission Ticket
+alternative. The authorization request MUST use `POST /authorize`
+(`application/x-www-form-urlencoded`) — GET is not permitted because the nested token and consent
+bundle make the payload too large for a query string (risk of HTTP 414). The authorization server
+validates the app's signature via its published JWKS, validates the IAL2 `id_token`, and validates
+the `consent_reference` Bundle against the requested FHIR scopes, then bypasses both the login
+screen and its native consent UI. The server issues an authorization code directly. The app
+exchanges it via `POST /token` with PKCE (`code_challenge_method: S256`) and a fresh
 `client_assertion`.
 
-This flow is the current reference pattern for SMART App Standalone Launch. The `cms_smart`
-extension is updated to version "2" under § 9.2.1 to accommodate a consent artifact — the
-login-bypass mechanism described here remains unchanged.
-
-### 8.2 Provider and Payer Access — B2B
-
-For system-to-system access by providers and payers, authentication uses the payer-initiated B2B integration pattern grounded in the trust signals established at registration (§ 7). The current reference implementation uses UDAP B2B flows; whether UDAP remains the required mechanism or is joined or superseded by CMS-signed software statements for B2B client types is an open architectural question — see § 7.1.
-
-**Primary pattern — SMART Backend Services + direct FHIR queries**
-
-All system-to-system B2B access uses SMART on FHIR Backend Services (OAuth 2.0 Client
-Credentials Grant). The requesting system authenticates to the data holder's authorization
-server by presenting a signed JWT client assertion against a published JWKS, obtains a
-short-lived access token, and queries the data holder's FHIR API directly using standard
-RESTful requests (e.g., `GET /Patient/{id}`, `GET /Observation?patient={id}`). No user-facing
-login is involved.
-
-This pattern is the floor for all B2B use cases — treatment, payment, operations, prior
-authorization, and payer-to-payer.
-
-**Optional — CDex Task pattern for payer-initiated attachment requests**
-
-For use cases requiring asynchronous, payer-initiated clinical attachment requests (e.g.,
-claim attachment workflows under CMS-0057-F), the HL7 CDex FHIR Task pattern MAY be
-used in place of direct synchronous queries. Under this pattern the network acts as
-intermediary: the payer submits a CDex-profiled FHIR Task to the network (`POST /Task`),
-the network performs a governance check and fulfills the task by querying the provider's
-FHIR API, then delivers the result to the payer via `POST /$submit-attachment`. Each
-leg uses the same SMART Backend Services authentication described above.
-
-**Standards:** SMART on FHIR Backend Services, OAuth 2.0 Client Credentials Grant, HL7 FHIR
-RESTful API, HL7 CDex (optional, for asynchronous attachment workflows).
-
-> **TODO:** The following are not specified for the B2B flow and must be defined before implementation: access token lifetime, refresh token behavior, credential rotation requirements, error handling on authentication failure, and retry policy.
-
----
-
-## 9. Authorization
-
-### 9.0 Required Precondition: Network-Mediated Record Location
+#### 8.1.1 Required Precondition: Network-Mediated Record Location
 
 Patient access depends first on record location.
 
 Every CMS-Aligned Network **SHALL** support network-mediated record location or source discovery for patient access.
-
-For July 4, 2026:
 
 1. A CMS-recognized patient-facing app listed in the CMS Medicare App Library **SHALL** be able to initiate record location through each CMS-Aligned Network or through its CMS-Aligned Network.
 2. The app **SHALL** authenticate as itself via a CMS-signed software statement from the CMS Registry (proposed solution under review — see § 7.1).
@@ -377,22 +343,22 @@ For July 4, 2026:
 8. The record-location response **SHALL** provide enough information for the app to pursue patient-access data retrieval through the applicable patient approval path below.
 9. The CMS-recognized patient-facing app (directly or through its CMS-Aligned Network) maintains audit logs covering the scope and duration of the individual's authorization to the app to continue retrieving their data.
 
-### 9.1 Required Conditions for All Paths
+#### 8.1.2 Required Conditions for All Paths
 
-Every access path **SHALL** satisfy all four of the following conditions before data retrieval may proceed. Each path below lists only what that path additionally requires beyond this shared foundation.
+Every access path **SHALL** satisfy all four of the following conditions before data retrieval may proceed. Each path below lists only what that path additionally requires beyond this shared foundation. Conditions 1–3 are the same app-recognition, app-authentication, and IAL2-identity facts already established for record location in § 8.1.1 — restated here because they gate authorization-path access independently of the earlier discovery-time check, not because they differ from it.
 
-1. The app is recognized by CMS or listed through a CMS-recognized app process and maintained within a CMS registry.
-2. The app authenticates as itself through a mechanism accepted by the network or data holder (proposed solution under review: CMS-signed software statement from CMS Registry — see § 7.1).
-3. The app presents a valid IAL2 patient identity token.
+1. The app is recognized by CMS or listed through a CMS-recognized app process and maintained within a CMS registry (§ 8.1.1 condition 1).
+2. The app authenticates as itself through the mechanism accepted by the network or data holder (§ 8.1.1 condition 2; see § 7.1).
+3. The app presents a valid IAL2 patient identity token (§ 8.1.1 condition 3). A data holder or network that cannot support the app-mediated `cms_smart` token-nesting approach in § 8.1 directly **MAY** instead obtain the equivalent CSP-authenticated identity signal using [UDAP Tiered OAuth for User Authentication](https://build.fhir.org/ig/HL7/fhir-udap-security-ig/user.html): the data holder redirects to the patient's preferred IdP (via the `idp` authorization parameter) and authenticates the patient directly, rather than relying on the app to forward a CSP-issued token.
 4. The request indicates that the purpose is HIPAA right of patient access, using the purpose-of-use code `PATRQT` as adopted for the ecosystem.
 
-### 9.2 Patient Authorization Paths
+#### 8.1.3 Patient Authorization Paths
 
-#### 9.2.1 Path 1 — Preferred: CMS-Recognized App + IAL2 Patient Identity (SHOULD)
+##### 8.1.3.1 Path 1 — Preferred: CMS-Recognized App + IAL2 Patient Identity (SHOULD)
 
 Pledged Networks, EHRs, and data holders **SHOULD** support this path, in which a CMS-recognized patient-facing app in good standing can obtain patient-access FHIR API tokens without separate app onboarding at each data holder and without provider portal login.
 
-All four conditions in § 9.1 apply. Additionally, under this path:
+All four conditions in § 8.1.2 apply. Additionally, under this path:
 
 5. The app requests access to the data needed for the patient's use case or as specified by the patient, consistent with the data holder's supported FHIR capabilities.
 6. The data holder or network approval service issues a FHIR API token for the requested and supported access, subject to applicable law, patient matching, local restrictions, supported capabilities, and security controls.
@@ -436,11 +402,13 @@ If an access token request does not include a Consent resource conveying positiv
 
 **Alternative to Consent Artifact: SMART Permission Tickets (under review)**
 
-As an alternative to the `cms_smart` consent bundle, a network or CMS-recognized issuer **MAY** issue a SMART Permission Ticket — a signed JWT that binds the patient identity, the requesting app, the authorized FHIR scopes, and an expiration. Data holders that receive a valid SMART Permission Ticket **MAY** issue a FHIR API token without a per-data-holder authorization screen. The specific ticket profile and issuance mechanism are under working group review; the spec will be updated when a profile is adopted.
+As an alternative to the `cms_smart` consent bundle, a network or CMS-recognized issuer **MAY** issue a SMART Permission Ticket — a signed JWT that binds the patient identity, the requesting app, the authorized FHIR scopes, and an expiration. Data holders that receive a valid SMART Permission Ticket **MAY** issue a FHIR API token without a per-data-holder authorization screen.
 
-#### 9.2.2 Path 2 — Allowed Alternative: Network-Level Consolidated Patient Approval (MAY)
+Unlike the `cms_smart` consent bundle above, which extends the existing OAuth SMART App Launch framework already in production use, SMART Permission Tickets are a new, not-yet-adopted token type with no ratified profile. This spec treats the `cms_smart` consent bundle (Option 1) as the primary Path 1 mechanism and SMART Permission Tickets (Option 2) as a tracked alternative; the specific ticket profile and issuance mechanism are under working group review, and the spec will be updated when a profile is adopted.
 
-If a data holder cannot meet all criteria of Path 1, it **MAY** rely on a network-level consolidated patient approval flow. All four conditions in § 9.1 apply. Additionally:
+##### 8.1.3.2 Path 2 — Allowed Alternative: Network-Level Consolidated Patient Approval (MAY)
+
+If a data holder cannot meet all criteria of Path 1, it **MAY** rely on a network-level consolidated patient approval flow. All four conditions in § 8.1.2 apply. Additionally:
 
 5. The approval applies across participating data holders within that network.
 6. The patient is not required to complete a separate approval screen for every data holder. Patients **SHOULD** be able to approve access to all FHIR resources by default (preferably "select all, uncheck by exception").
@@ -449,9 +417,9 @@ If a data holder cannot meet all criteria of Path 1, it **MAY** rely on a networ
 
 This path will be allowable through December 31, 2026 and will **NOT** be supported after that date.
 
-#### 9.2.3 Path 3 — July Bridge: Data Holder-Specific Patient Approval (MAY)
+##### 8.1.3.3 Path 3 — July Bridge: Data Holder-Specific Patient Approval (MAY)
 
-A data holder **MAY** rely on a data holder-specific patient approval flow as a July bridge. All four conditions in § 9.1 apply. Additionally:
+A data holder **MAY** rely on a data holder-specific patient approval flow as a July bridge. All four conditions in § 8.1.2 apply. Additionally:
 
 1. The data holder **SHALL NOT** require portal credentials.
 2. The approval screen **SHOULD** be limited to approving the app and requested access.
@@ -461,7 +429,9 @@ A data holder **MAY** rely on a data holder-specific patient approval flow as a 
 
 This path **MUST** be sunset by November 1, 2026. It should not be treated as the target ecosystem pattern.
 
-### 9.3 Required July Outcome
+**Long-term direction.** Beyond the paths above, CMS and working groups **SHOULD** continue reducing reliance on data-holder-specific screens and app-side identity forwarding — including through UDAP Tiered OAuth for User Authentication (§ 8.1.2) and network-issued portable approval artifacts (Path 2). The long-term target is a cross-ecosystem pattern where the patient proves identity once, chooses an app, the app discovers records across CMS-Aligned Networks, and data holders can evaluate a trusted approval signal without portal login or repeated site-specific burden.
+
+#### 8.1.4 Required July Outcome
 
 By July 4, 2026, a CMS-recognized patient-facing app in good standing, acting for an IAL2-verified patient, **MUST** be able to:
 
@@ -474,37 +444,58 @@ By July 4, 2026, a CMS-recognized patient-facing app in good standing, acting fo
 
 Networks and data holders **SHALL** document which patient approval path they support. Networks and data holders **SHOULD** report adoption metrics by path so CMS and the ecosystem can see where bridge patterns remain.
 
-### 9.4 Post-July Direction
+#### 8.1.5 Token Validation Requirements
 
-After July, CMS and working groups **SHOULD** focus on higher-assurance approval mechanisms that reduce reliance on data-holder-specific screens. Candidate approaches include:
-
-- CSP-assisted approval claims: a credential service provider participates in conveying that the patient approved a specific app to request access.
-- SMART Permission Tickets: a trusted issuer (network, CSP, or CMS-recognized authority) issues a signed artifact that the app presents to data holders.
-- Network-issued portable approval artifacts: a CMS-Aligned Network operates the consolidated approval flow and issues a portable artifact that participating data holders can validate.
-
-The long-term target is a cross-ecosystem pattern where the patient proves identity once, chooses an app, the app discovers records across CMS-Aligned Networks, and data holders can evaluate a trusted approval signal without portal login or repeated site-specific burden.
-
-### 9.5 Token Validation Requirements
-
-#### On Authorization
+**On Authorization**
 
 - A data holder responding to an IAS request that contains an `id_token` **SHALL** verify the relationship between the audience (`aud`) of the `id_token` and the presenting application. *(Specifics to be added depending on cert vs. software statements route choice.)*
 - The data holder **SHALL NOT** issue an access token if the incoming `id_token` contains an `auth_time` claim indicating the original user authentication occurred more than 300 seconds prior to the current request.
 - To prevent replay attacks, the data holder **SHALL** validate the identifier of the `id_token` for uniqueness. The data holder **SHALL NOT** accept an `id_token` if the combination of the JWT ID (`jti`) and Issuer (`iss`) claims has already been processed within the token's validity window.
 
-#### Access Tokens and Refresh Tokens
+**Access Tokens and Refresh Tokens**
 
 1. Access tokens issued by a data holder **SHALL** support renewal via refresh tokens on a rolling 90-day basis.
 2. The rolling 90-day expiration window **SHALL** reset upon each successful token refresh.
 3. Access tokens **SHALL** have a valid lifetime no greater than one hour.
 
+### 8.2 Provider and Payer Access — B2B
+
+For system-to-system access by providers and payers, authentication follows the [HL7 FAST Security IG's Business-to-Business profile](https://build.fhir.org/ig/HL7/fhir-udap-security-ig/b2b.html), grounded in the trust signals established at registration (§ 7). This profile's client-authentication mechanics — private-key JWT, no shared secret — apply regardless of which registration path § 7.1 ultimately settles on, CMS-signed software statement or UDAP X.509 certificate, since both bind a client to a published signing key; only the vetting path for that key differs.
+
+All headless, system-to-system B2B access — the common case for payer, provider, and payer-to-payer queries with no local user present — uses [SMART App Launch Backend Services](http://hl7.org/fhir/smart-app-launch/backend-services.html) for FHIR-specific discovery and scopes, with the FAST Security IG's B2B Client Credentials profile layered on top for the requestor-identity and purpose-of-use context that SMART Backend Services alone does not define. Both rest on the same underlying OAuth 2.0 **Client Credentials Grant** with private-key JWT client authentication — the two are not competing mechanisms, and a data holder implementing this pattern implements both together, not one instead of the other:
+
+1. The requesting system discovers the data holder's token endpoint and supported scopes via `<FHIR base>/.well-known/smart-configuration` (SMART Backend Services), and requests SMART v2 system scopes reflecting the resources it needs (e.g., `system/Patient.rs`, `system/Observation.rs`).
+2. The requesting system generates an Authentication Token JWT (`client_assertion`), signed with its private key, containing `iss` and `sub` (both set to its registered `client_id`), `aud` (the data holder's token endpoint), `exp`, `iat`, and `jti`. The token's lifetime **SHALL NOT** exceed 5 minutes (`exp` minus `iat` ≤ 300 seconds).
+3. The requesting system **SHALL** submit `POST /token` with `grant_type=client_credentials`, `scope`, `client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer`, `client_assertion`, and the fixed parameter `udap=1` — this last parameter is the FAST Security IG marker; it is additive to a plain SMART Backend Services request, not a replacement for it. No HTTP `Authorization` header or client secret is used.
+4. The Authentication Token **SHALL** include an `hl7-b2b` extension object identifying the request context — see § 8.2.1 for its authorization semantics.
+5. The data holder **SHALL** reject the token request with the applicable OAuth error (e.g., `invalid_client`, `invalid_grant`) if the assertion's signature, audience, expiration, or `jti` uniqueness check fails, or if the requested scope exceeds what was granted at registration. Otherwise it issues an access token with a lifetime that **SHALL NOT** exceed 60 minutes. Refresh tokens are not used with the client credentials grant — the requesting system obtains a new access token by repeating the client-assertion exchange.
+6. The requesting system queries the data holder's FHIR API directly using standard RESTful requests (e.g., `GET /Patient/{id}`, `GET /Observation?patient={id}`). No user-facing login is involved.
+
+This pattern is the floor for all B2B use cases — treatment, payment, operations, prior
+authorization, and payer-to-payer.
+
+#### 8.2.1 B2B Authorization Context
+
+Unlike the patient-facing path, B2B access does not carry an IAL2 identity or patient consent artifact by default — its authorization signal is the requesting organization's identity and its declared purpose of use, conveyed in the `hl7-b2b` extension object nested in the client assertion's `extensions` claim:
+
+- `organization_id` (**required**) — a URI identifying the Requestor organization. Trust communities **SHALL** define the allowed URI scheme(s).
+- `purpose_of_use` (**required**) — one or more codes identifying why the data is being requested (e.g., treatment, payment, operations), drawn from the HL7 PurposeOfUse value set.
+- `subject_name`, `subject_id`, `subject_role` (**conditional**) — identify the human requestor on whose behalf the automated request is made, where known.
+- `consent_policy`, `consent_reference` (**conditional**) — where a specific patient consent directive (a FHIR Consent or DocumentReference resource) governs the request, such as a patient-directed payer-to-payer transfer.
+
+A data holder **SHALL** process this extension in accordance with the policies established by the governing trust community, and **SHALL** use it for authorization decisions and audit logging — not merely client authentication. A client application **SHALL** only use the resulting access token in a manner consistent with the `organization_id` and `purpose_of_use` it asserted; if the same requesting system subsequently needs to act for a different requestor or purpose, it **SHALL** obtain a new access token with an updated extension rather than reusing the existing one.
+
+**Standards:** SMART App Launch Backend Services, [HL7 FAST Security IG](https://build.fhir.org/ig/HL7/fhir-udap-security-ig/b2b.html) (Business-to-Business profile), OAuth 2.0 Client Credentials Grant, HL7 FHIR RESTful API.
+
+> **TODO:** Credential rotation requirements and network-level retry policy on transient failures are not addressed by the FAST Security IG and remain open for this spec.
+
 ---
 
-## 10. Query / Data Exchange
+## 9. Query / Data Exchange
 
-> **TODO** § 10.3 Purpose of Use Propagation below straddles Authorization and Query / Data Exchange. The PoU declaration requirement and the code table arguably belong in Authorization (§ 9) as a gate on access; the propagation rule ("PoU MUST travel with the request to downstream systems") and the MUST NOT impose additional requirements sentence arguably belong here as query-handling rules. The subsection has been left in § 10 pending a reviewer decision on where the cut falls.
+> **TODO** § 9.3 Purpose of Use Propagation below straddles Authorization and Query / Data Exchange. The PoU declaration requirement and the code table arguably belong in Authorization (§ 8) as a gate on access; the propagation rule ("PoU MUST travel with the request to downstream systems") and the MUST NOT impose additional requirements sentence arguably belong here as query-handling rules. The subsection has been left in § 9 pending a reviewer decision on where the cut falls.
 
-### 10.1 Respond Completely
+### 9.1 Respond Completely
 
 When a query is authorized, the response **MUST** include all relevant data the responder holds for the patient, structured and unstructured, within the applicable Use Case.
 
@@ -524,7 +515,7 @@ USCDI v3 defines the **superset** of data elements that a Network and its Data H
 
 > No use case becomes a dead end.
 
-### 10.2 Use Case Coverage
+### 9.2 Use Case Coverage
 
 A Network **MUST** respond to queries from the actor categories that apply to the use cases its participants engage in:
 
@@ -536,11 +527,11 @@ A Network **MUST** respond to queries from the actor categories that apply to th
 
 If a network's participants engage in a use case, the network **MUST** support queries for that use case.
 
-### 10.3 Purpose of Use Propagation
+### 9.3 Purpose of Use Propagation
 
 Every data request **MUST** declare why the data is being accessed. A Network **MUST** support the HL7 Purpose of Use code set and apply the correct disclosure rules to each category.
 
-The following codes are **REQUIRED**, aligned to the approved use cases in § 10.2:
+The following codes are **REQUIRED**, aligned to the approved use cases in § 9.2:
 
 | Code | Display | Level | Use case |
 |---|---|---|---|
@@ -553,9 +544,9 @@ The following codes are **REQUIRED**, aligned to the approved use cases in § 10
 
 Purpose of use **MUST** travel with the request to downstream systems.
 
-When the requesting party is trusted and the purpose of use is properly declared, a Network and its participants **MUST NOT** impose additional authorization requirements on top. However, patients **MAY** restrict the data categories an app can access, and a Network **MUST** honor those restrictions. Patient-scoped restrictions are defined in § 9 (Authorization) and take precedence over this requirement.
+When the requesting party is trusted and the purpose of use is properly declared, a Network and its participants **MUST NOT** impose additional authorization requirements on top. However, patients **MAY** restrict the data categories an app can access, and a Network **MUST** honor those restrictions. Patient-scoped restrictions are defined in § 8.1 (Authorization) and take precedence over this requirement.
 
-### 10.4 Patient-Contributed Data
+### 9.4 Patient-Contributed Data
 
 Patient-contributed data (patient-reported outcomes, notes, home device readings, lifestyle data) is a planned Phase 2 capability. The write-side obligations — data holder acceptance, format, tagging as patient-contributed, deduplication, and review workflows — are not yet specified and are deferred from v0.3.
 
@@ -563,7 +554,7 @@ Networks and data holders **SHOULD** design their APIs to accommodate future pat
 
 ---
 
-## 11. National Provider Directory Publication
+## 10. National Provider Directory Publication
 
 The structure, formats, and data elements for NPD publication are defined in the [HTE Data Release Specifications](https://github.com/ftrotter-gov/HTE_data_release_specifications). A Network **MUST** conform to those specifications when publishing to NPD.
 
@@ -589,7 +580,7 @@ NPD **MUST** also be queryable by any Network, auditor, or participant to confir
 
 ---
 
-## 12. Audit Logging
+## 11. Audit Logging
 
 A Network **MUST** produce audit logs for queries on its network, including:
 
@@ -614,17 +605,17 @@ EHRs facilitating ecosystem queries are subject to the same audit obligations as
 
 ---
 
-## 13. Appointment and Encounter Notifications
+## 12. Appointment and Encounter Notifications
 
 A Network **MUST** provide appointment and encounter notifications for outpatient, telehealth, emergency department, and inpatient encounters using FHIR Subscriptions, where such notifications are permitted by existing law.
 
 > **Deferred — Not in Scope for July 4, 2026**
 >
-> Appointment and encounter notifications (§ 13) are not included in the July 4, 2026 GA requirements. The Notifications working group has not met in several months due to unresolved questions on network design and structure. This criterion will be revisited once those questions are resolved. Networks are not required to implement § 13 for initial CMS-Aligned recognition.
+> Appointment and encounter notifications (§ 12) are not included in the July 4, 2026 GA requirements. The Notifications working group has not met in several months due to unresolved questions on network design and structure. This criterion will be revisited once those questions are resolved. Networks are not required to implement § 12 for initial CMS-Aligned recognition.
 
 ---
 
-## 14. Security
+## 13. Security
 
 A Network MUST maintain HITRUST certification, scoped to the network's production environment that creates, receives, maintains, or transmits PHI on behalf of participants. This includes, at minimum, identity verification token validation, query routing, audit log generation, and patient matching reference data storage. Corporate functions that do not touch PHI are out of scope.
 
@@ -634,15 +625,15 @@ Business Associate Agreements (BAAs) MAY be required even where data is not dire
 
 ---
 
-## 15. Fees and Economics
+## 14. Fees and Economics
 
-### 15.1 Patient-Directed Access
+### 14.1 Patient-Directed Access
 
 A Network **MUST NOT** structure fees in a way that gates a patient's federal right to access their own data.
 
 The Fees exception at [45 CFR 171.302](https://www.ecfr.gov/current/title-45/part-171/section-171.302) and the ONC information blocking framework establish this floor. Cost recovery is permitted; platform fees structured to defeat patient access are not.
 
-### 15.2 Above the Floor
+### 14.2 Above the Floor
 
 A Network **MAY** set its own commercial terms for:
 
@@ -651,7 +642,7 @@ A Network **MAY** set its own commercial terms for:
 - voluntary commercial peering arrangements with other Networks;
 - value-added integration services.
 
-### 15.3 Inter-Network Settlement
+### 14.3 Inter-Network Settlement
 
 For patient-directed access traffic, inter-network settlement is **NOT** appropriate.
 
@@ -661,9 +652,9 @@ For other traffic types (treatment, payment, operations, prior auth, payer-to-pa
 
 ---
 
-## 16. Accountability
+## 15. Accountability
 
-A Network is accountable to CMS for meeting the obligations in §§ 3–15. Persistent failure is grounds for delisting from CMS-Aligned status on the same footing as failing any other Framework criterion.
+A Network is accountable to CMS for meeting the obligations in §§ 3–14. Persistent failure is grounds for delisting from CMS-Aligned status on the same footing as failing any other Framework criterion.
 
 A Network **MUST** publish operational metrics (response rates, query volumes, response times by use case) so apps and data holders can comparison-shop and so CMS can monitor adoption and performance. Network performance metrics appear in CMS scorecards (Framework criterion #19).
 
@@ -671,7 +662,7 @@ Outages and partial responses happen; the obligation is to meet published respon
 
 ---
 
-## 17. Rules of the Road Attestation
+## 16. Rules of the Road Attestation
 
 > **Placeholder.** The Rules of the Road Attestation are being discussed in the CAN Admin/Ops group and will be input into this document, or another companion guide, when they are complete.
 
@@ -688,9 +679,9 @@ These are gaps identified in source materials that this draft does not resolve. 
 | A2 | Mechanism for preventing endpoint-spamming under Pathway 3 (geo-search constraints, rate limits, query-shape rules). | Connectivity Pathways doc explicitly raises this as an unresolved question. |
 | A3 | Whether networks may charge data holders per query for required HTE use cases, and the same for payer-to-provider queries. | Workgroup Alternative Proposal § 2.3 — raised but not resolved by CMS in source materials. |
 | A4 | Definition and scope of the "on-ramp" intermediary role: separate ecosystem role or contracted vendor of the participant? | Workgroup Alternative Proposal § 2.2 — raised but not resolved. |
-| A5 | Operational profile for auto-registration timeline and the exact handoff between home-network onboarding and presumptive eligibility at receiving networks. | HTE Reference doc Part II — "defined timeline" referenced but not specified. |
+| A5 | Operational profile for dynamic registration timeline and the exact handoff between home-network onboarding and presumptive eligibility at receiving networks. | HTE Reference doc Part II — "defined timeline" referenced but not specified. |
 | A6 | Whether a single "Rules of the Road" document signed by all Networks is the right vehicle for cross-network operational standards, or whether criteria-based participation is sufficient. | Workgroup Alternative Proposal § 3.1 vs. HTE Reference doc Part I — disagreement; CMS chose criteria-based. |
-| A7 | NPD ingest/refresh cadence, schema, and authoritative trust-registry behavior. NPD currently operates as a static web file requiring manual flat-file submissions — there is no API for routine programmatic ingestion. The MUST in § 11 to ingest and publish updates routinely cannot be met at scale without a CMS-provided ingestion API. This item must be resolved before § 11 can be implemented as written. | HTE Reference doc Part II references publication but the operational profile is open. |
+| A7 | NPD ingest/refresh cadence, schema, and authoritative trust-registry behavior. NPD currently operates as a static web file requiring manual flat-file submissions — there is no API for routine programmatic ingestion. The MUST in § 10 to ingest and publish updates routinely cannot be met at scale without a CMS-provided ingestion API. This item must be resolved before § 10 can be implemented as written. | HTE Reference doc Part II references publication but the operational profile is open. |
 
 ---
 
@@ -711,8 +702,18 @@ References below appear in source materials. None are invented.
 
 - [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) — Key words for use in RFCs to Indicate Requirement Levels.
 - [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174) — Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words.
-- [RFC 7591](https://www.rfc-editor.org/rfc/rfc7591) — OAuth 2.0 Dynamic Client Registration Protocol.
+- [RFC 7591](https://www.rfc-editor.org/rfc/rfc7591) — OAuth 2.0 Dynamic Client Registration Protocol; the shared wire format for § 7 dynamic registration.
+- [RFC 6749](https://www.rfc-editor.org/rfc/rfc6749) — The OAuth 2.0 Authorization Framework; underlies the Client Credentials and Authorization Code grants used throughout § 8.
+- [RFC 7636](https://www.rfc-editor.org/rfc/rfc7636) — Proof Key for Code Exchange (PKCE); required on every authorization-code exchange in § 8.
 - [HL7 FAST Security Implementation Guide (HL7 FAST UDAP IG)](https://hl7.org/fhir/us/udap-security/) — Unified Data Access Profiles for B2B Health App Authorization, published through HL7 as the recognized SDO; defines the X.509-anchored software statement used by payers, providers, and networks.
+- [HL7 FAST Security IG, continuous build (v3.0.0-current)](https://build.fhir.org/ig/HL7/fhir-udap-security-ig/index.html) — pre-ballot successor build of the IG above; this spec cites its [Business-to-Business](https://build.fhir.org/ig/HL7/fhir-udap-security-ig/b2b.html) profile in § 8.2 and its [Tiered OAuth for User Authentication](https://build.fhir.org/ig/HL7/fhir-udap-security-ig/user.html) page in §§ 8.1–8.2.
+- [UDAP](https://www.udap.org/udap-ig-b2b-health-apps) — UDAP.org's base Implementation Guide for B2B Health Data Exchange, the X.509-anchored profile underlying the HL7 FAST Security IG.
+- [SMART App Launch — Backend Services](http://hl7.org/fhir/smart-app-launch/backend-services.html) — the OAuth 2.0 Client Credentials profile providing FHIR-specific discovery and scopes for § 8.2 B2B access.
+- [FHIR Patient `$match` operation](https://hl7.org/fhir/R4/patient-operation-match.html) — the Master Patient Index operation used for network-mediated record location in §§ 5.2 and 6.
+- [FHIR Bulk Data Exchange](https://hl7.org/fhir/uv/bulkdata) — referenced in § 3.4 for reducing system load on large data exchanges.
+- [HTE Data Release Specifications](https://github.com/ftrotter-gov/HTE_data_release_specifications) — structure, formats, and data elements required for § 10 NPD publication.
+- [CMS Patient Matching Proposal (v3.4.0)](https://docs.google.com/document/d/1NytpfZ05aokS-gD7uDIQE7gEyms9zMgoiaIah_w4VTE/edit?tab=t.0) — the field-combination matrix and matching logic incorporated by reference in § 6.
+- Josh Mandel, "Software Statements for the Medicare App Library," May 26, 2026 — cited in § 7.1 as the source for the CMS-signed software statement mechanism.
 - [ONC 21st Century Cures Act Final Rule](https://www.healthit.gov/curesrule).
 - [USCDI v3](https://www.healthit.gov/isa/united-states-core-data-interoperability-uscdi).
 - [HL7 FHIR US Core](https://hl7.org/fhir/us/core).
