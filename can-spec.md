@@ -21,7 +21,7 @@ The immediate focus of this specification is the use cases currently defined in 
 
 This document specifies the technical and operational requirements a Health Information Network MUST meet to be recognized as a **CMS-Aligned Network (Network)** under the CMS Health Technology Ecosystem (HTE).
 
-The specification covers the three core obligations of a CMS-Aligned Network, the three required connectivity pathways plus one optional pathway, patient matching, auto-registration, authentication, authorization, query handling, National Provider Directory (NPD) publication, audit logging, security validation, fees, and accountability.
+The specification covers the three core obligations of a CMS-Aligned Network, the three required connectivity pathways plus one optional pathway, patient matching, dynamic registration, authentication, authorization, query handling, National Provider Directory (NPD) publication, audit logging, security validation, fees, and accountability.
 
 This specification deliberately covers **network obligations only**. Trust pathways for apps, EHRs, providers, and payers are referenced where they intersect network behavior but are specified elsewhere.
 
@@ -31,7 +31,7 @@ This specification deliberately covers **network obligations only**. Trust pathw
 
 This is an editor's draft assembled from working-group materials. It has no normative force on its own. The authoritative source for CMS-Aligned status is the **CMS Interoperability Framework** published by CMS at <https://www.cms.gov/health-technology-ecosystem/interoperability-framework>. Where this document and the Framework conflict, the Framework controls.
 
-This draft is offered as a consolidated rendering of network-side requirements so that implementers can evaluate conformance against a single artifact. Working-group input is welcome on operational specifics (auto-registration profiles, audit standards, dispute resolution, presumptive-eligibility scope).
+This draft is offered as a consolidated rendering of network-side requirements so that implementers can evaluate conformance against a single artifact. Working-group input is welcome on operational specifics (dynamic registration profiles, audit standards, dispute resolution, presumptive-eligibility scope).
 
 ---
 
@@ -106,7 +106,7 @@ Every CMS-Aligned Network **MUST**:
 1. Meet the three core obligations in § 4.
 2. Support all three connectivity pathways in § 5.
 3. Use the CMS-approved patient matching logic (§ 6).
-4. Honor auto-registration and presumptive eligibility for participants in good standing on another home Network (§ 7).
+4. Honor dynamic registration and presumptive eligibility for participants in good standing on another home Network (§ 7).
 5. Authenticate participants using a federally grounded credential — IAL2 for patient-facing (B2C) flows, a recognized software statement for system-to-system (B2B) flows — no portal login may be required as a precondition (§ 8).
 6. Implement authorization per patient preferences (§ 9).
 7. Respond to authorized queries completely and without undue obstruction, subject to applicable access controls and authorization requirements (§ 10).
@@ -232,31 +232,27 @@ Two networks enter a direct contractual arrangement to exchange data with each o
 
 ## 6. Patient Matching
 
-A Network **MUST** implement the CMS-approved patient matching logic specified in the CMS Interoperability Framework. The current MVP standard evaluates **multiple permutations of patient demographic fields** to determine a match.
+A Network **MUST** implement the CMS-approved patient matching logic specified in the CMS Interoperability Framework. The current standard evaluates **combinations of patient demographic fields** — either directly, or in a two-step household-then-individual resolution for certain field combinations — to determine a match.
 
 A Network **MUST** respond when a query received via any pathway in § 5 matches a patient record across any of the specified field permutations, provided that authorization requirements under § 9 are satisfied. A match result alone does not create a response obligation if authorization has not been granted.
 
-> The exact field list and combination matrix are explained in a different specification, not duplicated here. See the [CMS Patient Matching Proposal (v3.3.0)](https://docs.google.com/document/d/1ABHR6e4N-K9lEj1vc7DuzoAy8CuaAqwqAZSpJH9T4Yg/edit?tab=t.0).
+> The exact field list and combination matrix are explained in a different specification, not duplicated here. See the [CMS Patient Matching Proposal (v3.4.0)](https://docs.google.com/document/d/1NytpfZ05aokS-gD7uDIQE7gEyms9zMgoiaIah_w4VTE/edit?tab=t.0).
 
 ---
 
-## 7. Auto-Registration and Presumptive Eligibility
+## 7. Dynamic Registration and Presumptive Eligibility
 
-### 7.1 Auto-Registration
+### 7.1 Dynamic Registration
 
 Registration at any Network data holder uses [RFC 7591 Dynamic Client Registration](https://www.rfc-editor.org/rfc/rfc7591) as the shared wire format. A client presents a signed software statement at the `/register` endpoint as the `software_statement` parameter. RFC 7591 is the mechanism; the software statement is the trust signal. Different issuers of software statements represent different trust paths — they share the same wire format but are not interchangeable.
 
+Which pathway a Network must accept — **CMS-signed software statements** or **UDAP X.509 certificates** — is pending Workgroup consensus.
+
 **CMS-signed software statements** can streamline dynamic registration for *many kinds of clients* — patient-facing apps, payers, providers, delegated tech solutions, and networks acting as clients — without requiring CMS to operate a CA or issue X.509 certificates. A CMS-signed software statement is a short-lived JWT (e.g., 24-hour TTL) signed by CMS that asserts a client's status in a CMS-maintained registry and binds it to a verified `jwks_uri`. A receiving authorization server can accept it without per-network re-vetting. To date, CMS's most concrete commitment is listing patient-facing apps in the **Medicare App Library** — that is an important and well-scoped starting point. The architecture of this spec does not treat it as the ceiling: as CMS extends registry coverage to other actor types, the same mechanism applies. See Josh Mandel, "Software Statements for the Medicare App Library," May 26, 2026.
 
-A Network **MUST** accept a valid CMS-signed software statement as sufficient for dynamic client registration, without additional per-network vetting, for any client type for which CMS has published a registry and issued a statement.
+**UDAP X.509 certificates** are the alternate pathway under consideration. [UDAP](https://www.udap.org/udap-ig-b2b-health-apps) is a specific profile of RFC 7591 dynamic client registration that uses X.509 certificates issued by a trust-community CA. It addresses the same core problem as CMS-signed software statements — enabling a client to be recognized across multiple Data Holders without bilateral out-of-band agreements — but via a CA-anchored certificate chain rather than a CMS-issued JWT.
 
-> **⚠ CONTESTED — Architecture Decision**
->
-> **Should UDAP / X.509 remain as a required or alternate dynamic registration path?**
->
-> [UDAP](https://www.udap.org/udap-ig-b2b-health-apps) is a specific profile of RFC 7591 dynamic client registration that uses X.509 certificates issued by a trust-community CA. It addresses the same core problem as CMS-signed software statements — enabling a client to be recognized across multiple Data Holders without bilateral out-of-band agreements — but via a CA-anchored certificate chain rather than a CMS-issued JWT. Having two mechanisms that address the same problem creates implementation complexity.
->
-> The question of whether UDAP / X.509 should remain a required path, an optional path, or be superseded by CMS software statements as CMS registry coverage grows is unresolved and must be decided by the working group before this section is finalized.
+Pending that decision, a Network **MUST** accept a valid CMS-signed software statement as sufficient for dynamic client registration, without additional per-network vetting, for any client type for which CMS has published a registry and issued a statement. Whether UDAP / X.509 remains a required path, becomes an optional path, or is superseded entirely by CMS software statements as CMS registry coverage grows will be resolved by the Workgroup before this section is finalized.
 
 All recognized credential types reduce to RFC 7591 plumbing at the receiving authorization server. The server **SHOULD** route signature validation by issuer: CMS published JWKS for CMS-signed software statements; UDAP trust community CA chain for UDAP software statements (if UDAP is retained as a recognized path).
 
@@ -266,7 +262,7 @@ The timeline is set by the CMS Interoperability Framework.
 
 A Network **MUST NOT** impose duplicative trust gating on top of the federally grounded credentials. Operational coordination (abuse contacts, rate-limit, security procedures, support channels) **MAY** be coordinated.
 
-Manual registration **MAY** be supported up until the deadline of October 1, 2026, at which time all participants in the HTE **MUST** support auto or dynamic registration.
+Manual registration **MAY** be supported up until the deadline of October 1, 2026, at which time all participants in the HTE **MUST** support dynamic registration.
 
 ### 7.2 Presumptive Eligibility
 
@@ -688,7 +684,7 @@ These are gaps identified in source materials that this draft does not resolve. 
 | A2 | Mechanism for preventing endpoint-spamming under Pathway 3 (geo-search constraints, rate limits, query-shape rules). | Connectivity Pathways doc explicitly raises this as an unresolved question. |
 | A3 | Whether networks may charge data holders per query for required HTE use cases, and the same for payer-to-provider queries. | Workgroup Alternative Proposal § 2.3 — raised but not resolved by CMS in source materials. |
 | A4 | Definition and scope of the "on-ramp" intermediary role: separate ecosystem role or contracted vendor of the participant? | Workgroup Alternative Proposal § 2.2 — raised but not resolved. |
-| A5 | Operational profile for auto-registration timeline and the exact handoff between home-network onboarding and presumptive eligibility at receiving networks. | HTE Reference doc Part II — "defined timeline" referenced but not specified. |
+| A5 | Operational profile for dynamic registration timeline and the exact handoff between home-network onboarding and presumptive eligibility at receiving networks. | HTE Reference doc Part II — "defined timeline" referenced but not specified. |
 | A6 | Whether a single "Rules of the Road" document signed by all Networks is the right vehicle for cross-network operational standards, or whether criteria-based participation is sufficient. | Workgroup Alternative Proposal § 3.1 vs. HTE Reference doc Part I — disagreement; CMS chose criteria-based. |
 | A7 | NPD ingest/refresh cadence, schema, and authoritative trust-registry behavior. NPD currently operates as a static web file requiring manual flat-file submissions — there is no API for routine programmatic ingestion. The MUST in § 11 to ingest and publish updates routinely cannot be met at scale without a CMS-provided ingestion API. This item must be resolved before § 11 can be implemented as written. | HTE Reference doc Part II references publication but the operational profile is open. |
 
